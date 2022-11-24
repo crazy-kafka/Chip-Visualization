@@ -178,7 +178,7 @@ class CoordinateProcess:
 
     @staticmethod
     def dbTransformBatch(trans_type: str, pt: Tuple[np.ndarray, np.ndarray], orient_name: str,
-                         origin: Tuple[float, float]) -> Tuple[float, float]:
+                         origin: Tuple[float, float]) -> Tuple[List[float], List[float]]:
         x = pt[0]
         y = pt[1]
         x0 = origin[0]

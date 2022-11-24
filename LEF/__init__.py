@@ -4,4 +4,4 @@ from typing import List, Tuple, Dict, Union, Iterable, TYPE_CHECKING, AnyStr
 if TYPE_CHECKING:
     pass
 
-from .lefParser import LefParser, TLefParser
+from .lefParser import LefParser, TlefParser

@@ -89,6 +89,21 @@ def polygonPartitioning(_V: List[Tuple[float, float]], mode='hrect', rects: List
         Print(f'Error: {mode} is not valid polygon partitioning mode. Only vrect and hrect are acceptable')
 
 
+def rectMapToPtnLocal(hInst: DbHInst, grid: Tuple[float, float, float, float]) -> Tuple[float, float, float, float]:
+    local_pt_0 = CoordinateProcess.dbTransform(trans_type='to_local', pt=(grid[0], grid[1]), orient_name=hInst.ptn_orient, origin=hInst.origin)
+    local_pt_1 = CoordinateProcess.dbTransform(trans_type='to_local', pt=(grid[2], grid[3]), orient_name=hInst.ptn_orient, origin=hInst.origin)
+    return min(local_pt_0[0], local_pt_1[0]), min(local_pt_0[1], local_pt_1[1]), max(local_pt_0[0], local_pt_1[0]), max(local_pt_0[1], local_pt_1[1])
+
+
+
+
+
+
+
+
+
+
+
 
 
 

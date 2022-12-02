@@ -16,8 +16,9 @@ class CompiledRe:
     __MODULE_DECLARE__ = rf'module\s+{__MODULE_NAME__}\s+\({__PORTS__}?\)'
     re_module_declare = re.compile(__MODULE_DECLARE__)
 
-    __BITS__ = rf'\[\s*(?P<l_bit>{__INTEGER__})\s*(?::\s*(?P<r_bit>{__INTEGER__}\s*)?\]'
-    __PORTS_DIRECTION__ = r'(?<direction>input|inout|output)'
+    __BITS__ = rf'\[\s*(?P<l_bit>{__INTEGER__})\s*(?::\s*(?P<r_bit>{__INTEGER__}\s*))?\]'
+    
+    __PORTS_DIRECTION__ = r'(?P<direction>input|inout|output)'
     __PORT_DECLARE__ = rf'(?:\s*{__PORTS_DIRECTION__})\s+(?:{__BITS__}\s+)?(?P<ports_name>[^;:]+)'
     re_port_declare = re.compile(__PORT_DECLARE__)
 
@@ -27,11 +28,11 @@ class CompiledRe:
     __INSTANTIATE__ = rf'(?P<ref_name>{__NAME__})\s+(?P<inst_name>{__NAME__})\s+\((?P<pin_conn>[^;]+)?\)'
     re_instantiate = re.compile(__INSTANTIATE__)
 
-    __NET__ = rf'(?P<base_name>{__NAME__})(?:{__BITS__}?$'
+    __NET__ = rf'(?P<base_name>{__NAME__})(?:{__BITS__})?$'
     re_net = re.compile(__NET__)
-    __PIN_NET_CONN__ = rf'\.(?P<term_name>[^\s\(\)\.]+)\(\s*(?P<net_by_name).*?)\s*\)'
+    __PIN_NET_CONN__ = rf'\.(?P<term_name>[^\s\(\)\.]+)\(\s*(?P<net_by_name>.*?)\s*\)'
     re_pin_net_conn = re.compile(__PIN_NET_CONN__)
-    __ASSIGN__ = rf'assign\s+(?P<lvalue>[^\s]+\s*=\s*(?P<rvalue>[^\s]+)'
+    __ASSIGN__ = rf'assign\s+(?P<lvalue>[^\s]+)\s*=\s*(?P<rvalue>[^\s]+)'
     re_assign_declare = re.compile(__ASSIGN__)
 
 

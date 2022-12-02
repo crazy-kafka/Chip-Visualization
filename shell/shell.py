@@ -6,15 +6,16 @@ from typing import AnyStr, List, Tuple, Dict, Union, Set, Iterable, TYPE_CHECKIN
 if TYPE_CHECKING:
     pass
 
+import platform
 import code
 import os
 import sys
 import rlcompleter
-import readline
+if platform.system() == 'Linix':
+    import readline
+    readline.parse_and_bind('tab: complete')
 import logging
 from utils import Print, GlobalVariable
-
-readline.parse_and_bind('tab: complete')
 
 
 class Shell(code.InteractiveConsole):

@@ -22,6 +22,7 @@ class VerilogParser:
         content = readFile(self.verilog_file).replace('\n', '').replace('\t', '')
         module_str_list = CompiledRe.re_module.findall(content)
         module_str_list.sort(key=lambda x:len(x), reverse=True)
+        # Print(f'Find {len(module_str_list)} modules')
 
         for module in map(self.parseModule, module_str_list):
             self.__modules[module.name] = module

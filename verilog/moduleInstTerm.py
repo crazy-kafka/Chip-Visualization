@@ -21,7 +21,7 @@ class ModuleInstTerm(VerilogBaseObj):
         super().__init__()
         self.name = term_name
         self.__nets: List[ModuleNet] = []
-        self.parseNets(net_string=nets_string)
+        self.parseNets(nets_string=nets_string)
 
     def parseNets(self, nets_string: AnyStr):
         for name in nets_string.replace(' ', '').replace('{', '').replace('}', '').split(','):

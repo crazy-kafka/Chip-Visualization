@@ -24,7 +24,7 @@ class Module(VerilogBaseObj):
         module_match = CompiledRe.re_module_declare.search(lines[0])
         self.__moduleMatch(match=module_match)
         for line in lines[1:]:
-            port_match = CompiledRe.re_port_declare.search(lines[0])
+            port_match = CompiledRe.re_port_declare.search(line)
             if port_match:
                 self.__portMatch(match=port_match)
             else:
@@ -44,7 +44,7 @@ class Module(VerilogBaseObj):
 
     def __assignMatch(self, match: Match):
         self.__assigns[match.groupdict()['lvalue']] = match.groupdict()['rvalue']
-        self.__assigns[match.groupdict()['rvalue']] = match.groupdict()['lvalue']
+        self.__assigns[match.groupdict()['rvalue']] = match.groupdict()['lvalue'] 
 
     def __moduleMatch(self, match: Match):
         self.name = match.groupdict()['module_name']
@@ -58,20 +58,18 @@ class Module(VerilogBaseObj):
         ports_name = match_dict['ports_name']
         l_bit = match_dict['l_bit']
         r_bit = match_dict['r_bit']
-        for port_name in [ii.strip(' ') for ii in match.groupdict()['ports'].split(',')]:
+        for port_name in [ii.strip(' ') for ii in match.groupdict()['ports_name'].split(',')]:
             self.__ports[port_name] = ModulePort(port_name)
 
     def __netMatch(self, match: Match):
         match_dict = match.groupdict()
-        direction = match_dict['direction']
-        ports_name = match_dict['ports_name']
+        net_names = match_dict['net_name']
         l_bit = match_dict['l_bit']
         r_bit = match_dict['r_bit']
-        for port_name in [ii.strip(' ') for ii in ports_name.strip(',')]:
-            port = self.port(port_name=port_name)
-            port.l_bit = l_bit
-            port.r_bit = r_bit
-            port.direction = direction
+        for net_name in [ii.strip(' ') for ii in net_names.strip(',')]:
+            net = ModuleNet(net_name)
+            net.l_bit = l_bit
+            net.r_bit = r_bit
 
     def __instMatch(self, match: Match):
         match_dict = match.groupdict()

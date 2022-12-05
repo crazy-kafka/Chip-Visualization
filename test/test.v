@@ -6,5 +6,5 @@ module test_module ( sig_a, sig_b,
   output sig_e;
   wire  n0, n1, n2, n3, n4, n5, n6, n7,
         n8, n9, n10, n11, n12, n13, n14;
-  STDCELL0 U0 ( .a(sig_a[0]), .b(sig_a[b]), .c(sig_e) );
+  STDCELL0 U0 ( .a(sig_a[0]), .b(sig_a[1]), .c(sig_e) );
 endmodule

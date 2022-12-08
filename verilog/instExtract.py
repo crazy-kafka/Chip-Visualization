@@ -10,7 +10,7 @@ from .verilogParser import VerilogParser
 class InstExtractor:
 
     def __init__(self, nl_file: AnyStr, top_name: AnyStr):
-        self.parser = VerilogParser(verilog_file=nl_file)
+        self.parser = VerilogParser(verilog_file=nl_file, ignore_conn=True)
         self.top_name = top_name
         self.insts = {}
         self.__deriveInsts(self.top_name)

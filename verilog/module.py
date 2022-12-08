@@ -12,8 +12,9 @@ from .moduleInst import ModuleInst
 
 class Module(VerilogBaseObj):
 
-    def __init__(self, module_string: str):
+    def __init__(self, module_string: str, ignore_conn):
         super().__init__()
+        self.ignore_conn = ignore_conn
         self.__ports: Dict[str, ModulePort] = {}
         self.__nets: Dict[str, ModuleNet] = {}
         self.__insts: Dict[str, ModuleInst] = {}
@@ -75,7 +76,7 @@ class Module(VerilogBaseObj):
         match_dict = match.groupdict()
         ref_name = match_dict['ref_name']
         inst_name = match_dict['inst_name']
-        conn = match_dict['pin_conn']
+        conn = match_dict['pin_conn'] if self.ignore_conn is False else None
         self.__insts[inst_name] = ModuleInst(inst_name=inst_name, ref_name=ref_name, pin_conn_str=conn)
 
     def port(self, port_name: AnyStr) -> ModulePort:

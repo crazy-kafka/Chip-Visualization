@@ -11,8 +11,9 @@ import time
 
 class VerilogParser:
 
-    def __init__(self, verilog_file: str):
+    def __init__(self, verilog_file: str, ignore_conn=False):
         self.__modules: Dict[str, Module] = {}
+        self.ignore_conn = ignore_conn
         self.verilog_file = verilog_file
         self.parseStart()
 
@@ -29,9 +30,8 @@ class VerilogParser:
 
         Print(f'End parsing of {self.verilog_file} in {round(time.time() - t0, 3)}s')
 
-    @staticmethod
-    def parseModule(module_string: str) -> Module:
-        return Module(module_string)
+    def parseModule(self, module_string: str) -> Module:
+        return Module(module_string, self.ignore_conn)
 
     def module(self, module_name: str) -> Module:
         return self.__modules[module_name]

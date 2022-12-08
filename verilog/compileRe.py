@@ -13,7 +13,7 @@ class CompiledRe:
 
     __MODULE_NAME__ = r'(?P<module_name>[^\s;]+)'
     __PORTS__ = r'(?P<ports>[^;]+)'
-    __MODULE_DECLARE__ = rf'module\s+{__MODULE_NAME__}\s+\({__PORTS__}?\)'
+    __MODULE_DECLARE__ = rf'module\s+{__MODULE_NAME__}\s*\({__PORTS__}?\)'
     re_module_declare = re.compile(__MODULE_DECLARE__)
 
     __BITS__ = rf'\[\s*(?P<l_bit>{__INTEGER__})\s*(?::\s*(?P<r_bit>{__INTEGER__}\s*))?\]'
@@ -25,7 +25,7 @@ class CompiledRe:
     __NET_DECLARE__ = rf'wire\s+(?:{__BITS__}\s+)?(?P<net_name>.+)'
     re_net_declare = re.compile(__NET_DECLARE__)
 
-    __INSTANTIATE__ = rf'(?P<ref_name>{__NAME__})\s+(?P<inst_name>{__NAME__})\s+\((?P<pin_conn>[^;]+)?\)'
+    __INSTANTIATE__ = rf'(?P<ref_name>{__NAME__})\s+(?P<inst_name>{__NAME__})\s*\((?P<pin_conn>[^;]+)?\)'
     re_instantiate = re.compile(__INSTANTIATE__)
 
     __NET__ = rf'(?P<base_name>{__NAME__})(?:{__BITS__})?$'

@@ -24,7 +24,7 @@ class CompiledRe:
     re_direction = re.compile(DIRECTION)
     USE = r'USE ([A-Z]+)'
     re_use = re.compile(USE)
-    LAYER = r'LAYER ([0-9a-zA-Z]+'
+    LAYER = r'LAYER ([0-9a-zA-Z]+)'
     re_layer = re.compile(LAYER)
     RECT = rf'RECT (?:MASK \d )?({FLOAT}) ({FLOAT}) ({FLOAT}) ({FLOAT})'
     re_rect = re.compile(RECT)
@@ -35,8 +35,8 @@ class CompiledRe:
     re_layer_direction = re.compile(rf'^\s*DIRECTION\s+(?P<DIRECTION>HORIZONTAL|VERTICAL)\s+')
     re_layer_pitch = re.compile(rf'^\s*PITCH\s+(?P<PITCH_X>{FLOAT})\s+(?P<PITCH_Y>{FLOAT})\s+')
     re_layer_width = re.compile(rf'^\s*WIDTH\s+(?P<WIDTH>{FLOAT})\s+')
-    re_layer_min_width = re.compile(rf'^\s*MINWIDTH\s+(?P<MINWIDTH>{FLOAT})\s+)')
-    re_layer_max_width = re.compile(rf'^\s*MAXWIDTH\s+(?P<MAXWIDTH>{FLOAT})\s+)')
+    re_layer_min_width = re.compile(rf'^\s*MINWIDTH\s+(?P<MINWIDTH>{FLOAT})\s+')
+    re_layer_max_width = re.compile(rf'^\s*MAXWIDTH\s+(?P<MAXWIDTH>{FLOAT})\s+')
     re_layer_spacing = re.compile(rf'^\s*SPACING\s+(?P<SPACING>{FLOAT})\s+')
     re_area = re.compile(rf'^\s*AREA\s+(?P<AREA>{FLOAT})\s+;')
 

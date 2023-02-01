@@ -23,9 +23,9 @@ proc get_interface_info {port_name} {
         set output_delay [get_attribute $path_col endpoint_output_delay_value]
         set end_point_col [get_attribute $path_col endpoint]
         set reg_x [get_attribute $end_point_col x_coordinate]
-        if {$reg_x = ""} {set reg_x 0} else {set reg_x [expr $reg_x/$unit]}
+        if {$reg_x == ""} {set reg_x 0} else {set reg_x [expr $reg_x/$unit]}
         set reg_y [get_attribute $end_point_col y_coordinate]
-        if {$reg_y = ""} {set reg_y 0} else {set reg_y [expr $reg_y/$unit]}
+        if {$reg_y == ""} {set reg_y 0} else {set reg_y [expr $reg_y/$unit]}
         set path_delay [expr $arrival-$input_clock_latency-$input_delay]
         set clock_latency $input_reg_clock_latency
         set reg_name [get_object_name [get_cells -of_objects [get_attribute $path_col endpoint]]]
@@ -45,9 +45,9 @@ proc get_interface_info {port_name} {
         set output_delay [get_attribute $path_col endpoint_output_delay_value]
         set start_point_col [get_attribute $path_col startpoint]
         set reg_x [get_attribute $start_point_col x_coordinate]
-        if {$reg_x = ""} {set reg_x 0} else {set reg_x [expr $reg_x/$unit]}
+        if {$reg_x == ""} {set reg_x 0} else {set reg_x [expr $reg_x/$unit]}
         set reg_y [get_attribute $start_point_col y_coordinate]
-        if {$reg_y = ""} {set reg_y 0} else {set reg_y [expr $reg_y/$unit]}
+        if {$reg_y == ""} {set reg_y 0} else {set reg_y [expr $reg_y/$unit]}
         set reg_name [get_object_name 【get_cells -of_object [get_attribute $path_col startpoint]]]
         if {$reg_name == ""} {
             set path_delay [expr $arrival-$output_reg_clock_latency-$input_delay]

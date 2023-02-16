@@ -2,6 +2,10 @@ proc get_interface_info {port_name} {
     set port_col [get_ports $port_name -exact]
     set direction [get_attribute $port_col direction]
     puts "Collecting $port_name ($direction) information"
+    if {$direction == "inout"} {
+        puts "Inout port $port_name is ignored"
+		return 0
+    }
     set unit 1000
     set port_x [expr [get_attribute $port_col x_coordinate]/$unit]
     set port_y [expr [get_attribute $port_col y_coordinate]/$unit]
@@ -63,6 +67,7 @@ proc get_interface_info {port_name} {
         }
     } elseif {$direction == "inout"} {
         puts "Inout port $port_name is ignored"
+        return 0
     }
     set manhattan_distance [expr abs($port_x-$reg_x)+abs($port_y-$reg_y)]
     if {$manhattan_distance == 0} {

@@ -26,7 +26,7 @@ class CompiledRe:
 
     ORIENT = r'(?P<orient>N|S|W|E|FN|FS|FW|FE)'
     SOURCE = r'\+ SOURCE (?P<source>NETLIST|DIST|USER|TIMING)\s+'
-    re_component = re.compile(rf'-\s+(?P<compName>\S+)\s+(?P<modelName>\S+\s+(?:{SOURCE})?{PSTATUS}\s+{PT}\s+{ORIENT}')
+    re_component = re.compile(rf'-\s+(?P<compName>\S+)\s+(?P<modelName>\S+)\s+(?:{SOURCE})?{PSTATUS}\s+{PT}\s+{ORIENT}')
     re_end_component = re.compile(rf'END COMPONENTS')
     PG = rf'-\s+(?P<pgNet>\S+)'
     DIE_PART = rf'DIEAREA\s+(\(\s+\d+\s+\d+\s\)[\s\n]+)+;'

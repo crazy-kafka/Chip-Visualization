@@ -3,3 +3,6 @@ from typing import AnyStr, List, Tuple, Dict, Union, Set, Iterable, TYPE_CHECKIN
 
 if TYPE_CHECKING:
     pass
+
+from .uiDB import UiDB
+

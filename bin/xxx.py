@@ -18,7 +18,7 @@ from utils import logInitialize
 
 if __name__ == '__main__':
 
-    arg_parser = argparse.ArgumentParser(description='Proton - Chip Visualization Tool by COT')
+    arg_parser = argparse.ArgumentParser(description=f'XXX - Chip Visualization Tool by Hongji.Liu')
     arg_parser.add_argument('-f', '--file', type=str, default='', help='The initial file executed at the beginning of program')
     arg_parser.add_argument('-l', '--log', type=str, default='', help='log file for proton')
     arg_parser.add_argument('--nolog', action='store_true', help='no log')

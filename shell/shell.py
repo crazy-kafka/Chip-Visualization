@@ -11,7 +11,7 @@ import code
 import os
 import sys
 import rlcompleter
-if platform.system() == 'Linix':
+if platform.system() == 'Linux':
     import readline
     readline.parse_and_bind('tab: complete')
 import logging
@@ -22,8 +22,8 @@ class Shell(code.InteractiveConsole):
 
     INIT = 'import sys, os;print("Python", sys.version);sys.ps1="\x01\x1b[1;49;33m\x02>>>\x01\x1b[0m\x02 ";sys.ps="\x01\x1b[1;49;31m\x02...\x01\x1b[0m\x02 ";'
     BUILDIN_CMDs = [f'{os.path.dirname(__file__)}/proton_command.py']
-    BANNER = '\nWelcome to XXX Shell :)'
-    EXITMSG = 'Now exiting XXX...'
+    BANNER = '\nWelcome to photon Shell :)'
+    EXITMSG = 'Now exiting photon...'
 
     def __init__(self, scope=None, init_file: str=''):
         super().__init__(locals=scope)

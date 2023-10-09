@@ -21,7 +21,7 @@ class CompiledRe:
     PT = rf'\(\s+(?P<x>{INTEGER}+)\s+(?P<y>{INTEGER}+)\s+\)'
     PT0 = rf'\(\s+(?P<x0>{INTEGER}+)\s+(?P<y0>{INTEGER}+)\s+\)'
     PT1 = rf'\(\s+(?P<x1>{INTEGER}+)\s+(?P<y1>{INTEGER}+)\s+\)'
-    PT2 = rf'\(\s+(?P<y2>{INTEGER}+)\s+(?P<y2>{INTEGER}+)\s+\)'
+    PT2 = rf'\(\s+(?P<x2>{INTEGER}+)\s+(?P<y2>{INTEGER}+)\s+\)'
     re_pt = re.compile(PT)
 
     ORIENT = r'(?P<orient>N|S|W|E|FN|FS|FW|FE)'
@@ -36,9 +36,9 @@ class CompiledRe:
     re_end_design = re.compile(END_DESIGN)
 
     re_net = re.compile(rf'-\s+(?P<net_name>{NAME})')
-    re_net_conn = re.compile(rf'\(\s+(?P<inst_name>{NAME})\s+(?P<term_name?{NAME})\s+\)')
+    re_net_conn = re.compile(rf'\(\s+(?P<inst_name>{NAME})\s+(?P<term_name>{NAME})\s+\)')
 
-    re_special_wiring = re.compile(rf'(?P<layer>{NAME})\S+(?P<width>\d+)\s+\(\s*(?P<x0>[*\d]+)\s+(?P<y0>[*\d]+)(?:\s+(?P<e0>\d+))?\s*\)(?:\s+\(\s*(?P<x1>[*\d]+)\s+(?P<y1>[*\d]+)(?:\s+(?P<e1>\d+))?\s*\))?(?:\s+(?P<via>{NAME}))?)')
+    re_special_wiring = re.compile(rf'(?P<layer>{NAME})\S+(?P<width>\d+)\s+\(\s*(?P<x0>[*\d]+)\s+(?P<y0>[*\d]+)(?:\s+(?P<e0>\d+))?\s*\)(?:\s+\(\s*(?P<x1>[*\d]+)\s+(?P<y1>[*\d]+)(?:\s+(?P<e1>\d+))?\s*\))?(?:\s+(?P<via>{NAME}))?')
 
     re_routing_point = re.compile(rf'\(\s*(?P<x>[\*\d]+)\s+(?P<y>[\*\d]+)(?:\s+(?P<e>\d+))?\s*\)')
     re_routing_point_0 = re.compile(rf'\(\s*(?P<x0>[\*\d]+)\s+(?P<y0>[\*\d]+)(?:\s+(?P<e0>\d+))?\s*\)')

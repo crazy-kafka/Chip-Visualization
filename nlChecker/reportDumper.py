@@ -24,7 +24,7 @@ class ReportDumper:
                   'comb_cell(>4pins)_cnt',
                   'comb_cell(>4pins)_ratio',
                   'stdcell_cnt',
-                  'sdtcell_area',
+                  'stdcell_area',
                   'stdcell_bit',
                   'reg_cnt',
                   'reg_area',
@@ -49,8 +49,8 @@ class ReportDumper:
                   'ELVT_AREA'
                   ]
 
-    def __init__(self, reg_graph: nx.DiGraph, tar_graph=nx.DiGraph()):
-        self.ref_graph = reg_graph
+    def __init__(self, ref_graph: nx.DiGraph, tar_graph=nx.DiGraph()):
+        self.ref_graph = ref_graph
         self.tar_graph = tar_graph
         self.ref_name = ''
         self.tar_name = ''
@@ -64,10 +64,10 @@ class ReportDumper:
 
     def __genVirtualCsv(self):
         dump_mode = 1
-        if self.ref_graph.number_of_nodes() > 0 and self.ref_graph.number_of_nodes() > 0:
+        if self.ref_graph.number_of_nodes() > 0 and self.tar_graph.number_of_nodes() > 0:
             dump_mode = 0
             Print('Dumping in comparision report mode')
-        elif self.tar_graph.number_of_nodes() == 0 and self.ref_graph.number_of_nodes() > 0:
+        elif self.ref_graph.number_of_nodes() > 0 and self.tar_graph.number_of_nodes() == 0:
             Print(f'Dumping in single report mode')
         else:
             Print(f'Reference DB is not loaded')
@@ -90,7 +90,7 @@ class ReportDumper:
             self.output_dict['hierarchical_info'].append(['*'] * graph_depth + self.info_types)
             for root in root_list:
                 lines = []
-                self.__buildHeirarchyLine(self.ref_graph, root, graph_depth, graph_depth, lines)
+                self.buildHierarchyLine(self.ref_graph, root, graph_depth, graph_depth, lines)
                 self.output_dict['hierarchical_info'] += lines
         elif dump_mode == 0:
             header = [self.info_types[0]]
@@ -129,7 +129,7 @@ class ReportDumper:
             self.output_dict['hierarchical_info'].append(header)
             for root in root_list:
                 lines = []
-                self.__buildDiffHierarchyLine(self.ref_graph, self.tar_graph, root, graph_depth, graph_depth, lines)
+                self.buildDiffHierarchyLine(self.ref_graph, self.tar_graph, root, graph_depth, graph_depth, lines)
                 self.output_dict['hierarchical_info'].append(header)
         for _, lines in self.output_dict.items():
             for line in lines:
@@ -148,7 +148,7 @@ class ReportDumper:
             worksheet = workbook.add_worksheet(name=sheet_name)
             for row, line in enumerate(content):
                 for col, cell in enumerate(line):
-                    worksheet.write(row, col ,cell)
+                    worksheet.write(row, col, cell)
                 bias_merge_left = 0
                 bias_merge_right = 0
                 for col, cell in enumerate(line):
@@ -171,17 +171,17 @@ class ReportDumper:
         workbook.close()
 
     @staticmethod
-    def __buildHierarchyLine(graph: nx.DiGraph, root: str, bias: int, _bias: int, lines: list):
-        line = ['*'] * (bias - _bias) + [root] + ['*'] * bias
+    def buildHierarchyLine(graph: nx.DiGraph, root: str, bias: int, _bias: int, lines: list):
+        line = ['*'] * (bias - _bias) + [root] + ['*'] * _bias
         info = graph.nodes[root][ReportDumper.hier_info_label]
         for info_type in ReportDumper.info_types[1:]:
             line.append(info[info_type])
         lines.append(line)
         for node in graph.neighbors(root):
-            ReportDumper.__buildHierarchyLine(graph, node, bias, _bias-1, lines)
+            ReportDumper.buildHierarchyLine(graph, node, bias, _bias-1, lines)
 
     @staticmethod
-    def __buildDiffHierarchyLine(ref_graph: nx.DiGraph, tar_graph: nx.DiGraph, root: str, bias: int, _bias: int, lines: list):
+    def buildDiffHierarchyLine(ref_graph: nx.DiGraph, tar_graph: nx.DiGraph, root: str, bias: int, _bias: int, lines: list):
         line = ['*'] * (bias - _bias) + [root] + ['*'] * _bias
         ref_info = ref_graph.nodes[root][ReportDumper.hier_info_label]
         if root in tar_graph:
@@ -204,7 +204,7 @@ class ReportDumper:
 
         lines.append(line)
         for node in ref_graph.neighbors(root):
-            ReportDumper.__buildDiffHierarchyLine(ref_graph, tar_graph, node, bias, _bias - 1, lines)
+            ReportDumper.buildDiffHierarchyLine(ref_graph, tar_graph, node, bias, _bias - 1, lines)
 
 
 

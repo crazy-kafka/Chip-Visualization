@@ -31,8 +31,8 @@ class NlChecker:
         self.hierarchy_graph = nx.DiGraph()
         self.graph_level_dict = {}
         self.parseStart()
-        self.analyzeNlInfo()
-        self.constructHGraph()
+        #self.analyzeNlInfo()
+        #self.constructHGraph()
 
     def __assignLevel(self, root, current_node):
         path_list = list(nx.all_simple_paths(self.hierarchy_graph, root, current_node))
@@ -43,8 +43,8 @@ class NlChecker:
             if self.graph_level_dict[current_node] is not None:
                 if level > self.graph_level_dict[current_node]:
                     self.graph_level_dict[current_node] = level
-                else:
-                    self.graph_level_dict[current_node] = level
+            else:
+                self.graph_level_dict[current_node] = level
         for neighbor in self.hierarchy_graph.neighbors(current_node):
             self.__assignLevel(root, neighbor)
 
@@ -219,7 +219,7 @@ class NlChecker:
                     continue
                 if re.search(mem_patt, lib_info.footprint):
                     nl_info['mem_cnt'] += cnt
-                    nl_info['mem_area'] += cnt
+                    nl_info['mem_area'] += cnt * lib_info.area
                     bits_match = re.search(mem_bit_patt, cell)
                     if bits_match:
                         nl_info['mem_bits'] += cnt * int(bits_match.group(1)) * int(bits_match.group(2))
@@ -232,7 +232,7 @@ class NlChecker:
                 if re.search(reg_patt, lib_info.footprint):
                     nl_info['reg_cnt'] += cnt
                     nl_info['reg_area'] += cnt * lib_info.area
-                    mb_match = re.match(f'MB(\d+)', cell)
+                    mb_match = re.match(r'MB(\d+)', cell)
                     bit_num = 1
                     if mb_match:
                         bit_num = int(mb_match.group(1))
@@ -242,7 +242,7 @@ class NlChecker:
                     if cell_pin_cnt > 4:
                         nl_info['comb_cell(>4pins)_cnt'] += cnt
                 vt_type = NlChecker.inferCellVtType(cell, lib_info)
-                nl_info[f'{vt_type}_RATIO'] += cnt * lib_info.area
+                nl_info[f'{vt_type}_RATIO'] += cnt
                 nl_info[f'{vt_type}_AREA'] += cnt * lib_info.area
             else:
                 if cell not in module_list:
@@ -258,17 +258,17 @@ class NlChecker:
         with ConcurrentProcess.MP_POOL(ConcurrentProcess.PROCESS_CNT) as pool:
             for top_name, cell_dict in pool.map(nlParseWorker, args):
                 self.nl_cell_dict[top_name] = cell_dict
-            self.nl_info_dict[top_name] = {
-                'mem_cnt': 0,
-                'mem_area': 0,
-                'stdcell_cnt': 0,
-                'stdcell_area': 0,
-                'reg_cnt': 0,
-                'reg_area': 0,
-                'total_cnt': 0,
-                'total_area': 0,
-                'leakage': 0
-            }
+                self.nl_info_dict[top_name] = {
+                    'mem_cnt': 0,
+                    'mem_area': 0,
+                    'stdcell_cnt': 0,
+                    'stdcell_area': 0,
+                    'reg_cnt': 0,
+                    'reg_area': 0,
+                    'total_cnt': 0,
+                    'total_area': 0,
+                    'leakage': 0
+                }
 
     @staticmethod
     def inferCellVtType(cell_name: str, lib_info: DbMacro):
@@ -287,7 +287,7 @@ class NlChecker:
             elif cell_name.startswith('TS3N05LVT'):
                 return 'LVT'
         else:
-            for vt_type in ['SVT', 'LVTLL', 'LVT', 'ULVTLL', 'ULVT', 'ELVT']:
+            for vt_type in ['ULVTLL', 'ULVT', 'LVTLL', 'LVT', 'SVT', 'ELVT']:
                 if cell_name.endswith(vt_type):
                     return vt_type
         Print(f'Unrecognized vt type for cell < {cell_name} > lib_info', level='error')

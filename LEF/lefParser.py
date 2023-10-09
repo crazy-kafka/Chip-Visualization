@@ -121,9 +121,12 @@ class LefParser:
         self.__macro_list = []
         self.__macro_dict = {}
         self.lef_list = lef_list
-        self.cf_lines = self.getAllLefLines(self.lef_list)
-        self.extractMacroInfo(self.cf_lines)
-        del self.cf_lines
+        for lef in lef_list:
+            Print(f'Parsing {lef}')
+            self.extractMacroInfo(self.getAllLefLines([lef]))
+        #self.cf_lines = self.getAllLefLines(self.lef_list)
+        #self.extractMacroInfo(self.cf_lines)
+        #del self.cf_lines
         Print(f'End parsing {len(self.lef_list)} LEF file in {round(time.time() - t0, 3)}s')
 
     def getMacros(self) -> Dict[str, LefMacro]:
@@ -160,6 +163,10 @@ class LefParser:
                             pin_name = pin_name_match.group(1)
                             pin_end = f'END {pin_name}'
                             cursor += 1
+                            direction = 'UNKNOWN'
+                            use = 'SIGNAL'
+                            layer = 'UNKNOWN'
+                            shape = [0, 0, 0, 0]
                             while pin_end not in lef_lines[cursor]:
                                 direction_match = CompiledRe.re_direction.search(lef_lines[cursor])
                                 if direction_match:

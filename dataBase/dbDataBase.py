@@ -71,7 +71,7 @@ class DbDataBase:
         self.__initMacro()
         self.__initNetList()
         self.__initModuleAttribute()
-        self.__initFtDb()
+        # self.__initFtDb()
 
     def allHInsts(self) -> List[DbHInst]:
         return [self.chip.hInst] + list(self.chip.hInst.treeHInsts.values())
@@ -92,24 +92,24 @@ class DbDataBase:
     def __initTechLef(self):
         if self.techLayerParser is None and self.TECH_LEF is not None:
             self.techLayerParser = TlefParser(self.TECH_LEF)
-        idx = 1
-        for layer in self.techLayerParser.layers.values():
-            if layer.type == 'ROUTING' and layer.region is None:
-                _idx = idx
-                idx += 1
-            else:
-                _idx = 0
-            self.createLayer(name=layer.name,
-                             Type=layer.type,
-                             direction=layer.direction,
-                             pitch_x=layer.pitch_x,
-                             pitch_y=layer.pitch_y,
-                             width=layer.width,
-                             spacing=layer.spacing,
-                             area=layer.area,
-                             region=layer.region,
-                             base_layer=layer.based_layer,
-                             idx=_idx)
+            idx = 1
+            for layer in self.techLayerParser.layers.values():
+                if layer.type == 'ROUTING' and layer.region is None:
+                    _idx = idx
+                    idx += 1
+                else:
+                    _idx = 0
+                self.createLayer(name=layer.name,
+                                 Type=layer.type,
+                                 direction=layer.direction,
+                                 pitch_x=layer.pitch_x,
+                                 pitch_y=layer.pitch_y,
+                                 width=layer.width,
+                                 spacing=layer.spacing,
+                                 area=layer.area,
+                                 region=layer.region,
+                                 base_layer=layer.based_layer,
+                                 idx=_idx)
 
     def createLayer(self, name: str, Type='custom', direction='', pitch_x=0.0, pitch_y=0.0, width=0.0, spacing=0.0, area=0.0, region=None, base_layer=None, idx=0):
         self.layers[name] = TechLayer(name=name, type=Type, direction=direction, pitch_x=pitch_x, width=width, spacing=spacing, area=area, region=region, base_layer=base_layer, idx=idx)
@@ -143,7 +143,9 @@ class DbDataBase:
             for verilogParser in map(VerilogParser, self.VERILOG_LIST):
                 for module_name, module in verilogParser.allModules().items():
                     self.modules[module_name] = module
-
+        if self.modules == {}:
+            Print(f'Netlist is not initialized in database')
+            return
         for _, term in self.modules[self.TOP_NAME].allPorts.items():
             for ii in term.granulate():
                 hInstTerm = self.chip.hInst.addHInstTerm(ii, term.direction)

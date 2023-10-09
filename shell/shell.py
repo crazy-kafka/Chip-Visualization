@@ -30,7 +30,7 @@ class Shell(code.InteractiveConsole):
         self.__histories = []
         self.runsource(self.INIT)
         for CMD in self.BUILDIN_CMDs:
-            self.runsource(f'exec(open("{CMD}").read()')
+            self.runsource(f'exec(open("{CMD}").read())')
         Print(GlobalVariable.BANNER)
 
     def runfile(self, input_file):

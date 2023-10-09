@@ -14,4 +14,4 @@ class CompiledRe:
     re_footprint = re.compile(r'cell_footprint\s*:\s*"([^""]+)"\s*;')
     re_memory = re.compile(r'\s*memory\s*\(\)\s*{')
     re_leakage = re.compile(r'leakage_power\s*\(\)\s*{')
-    re_value = re.compile(r'value\s*:\s*([0-9]+(\.[0-9]+)?)]\s*;')
+    re_value = re.compile(r'value\s*:\s*([0-9]+(\.[0-9]+)?)\s*;')

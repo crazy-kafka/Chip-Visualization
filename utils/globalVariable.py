@@ -20,7 +20,9 @@ class GlobalVariable:
     PROCESS_CNT = 16
     LSF_CMD = 'bsub -q aaa.q -n1 -P aaa -R "rusage[mem=20GB】"'
 
-    BANNER = r'''
+    SOFTWARE = 'photon'
+
+    BANNER = rf'''
 |-------------------------------------------------------------------------------|
 |     //-----\    //     //   //-----\    ----------   //-----\     /\       // | 
 |    //     //   //     //   //      //      //       //      //   // \     //  |
@@ -28,7 +30,7 @@ class GlobalVariable:
 |  //          //     //   //      //      //       //      //   //     \ //    |
 | //          //     //     \-----//      //         \-----//   //       \/     |
 |-------------------------------------------------------------------------------|
-                         CHIP VISUALIZE TOOL - PHOTON
+                         CHIP VISUALIZE TOOL - {SOFTWARE}
                             Developed By Hongji.Liu
 '''
 

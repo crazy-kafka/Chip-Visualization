@@ -51,7 +51,7 @@ class DbDataBase:
         self.module_def_dict: Dict[str, DefParser] = {}
         self.module_attribute: Dict[str, List[DbAttribute]] = {}
 
-        self.gui_window: MainWindow = None
+        self.gui_window: [None, MainWindow] = None
 
         self.ft_db = None
 
@@ -100,7 +100,7 @@ class DbDataBase:
                 else:
                     _idx = 0
                 self.createLayer(name=layer.name,
-                                 Type=layer.type,
+                                 layer_type=layer.type,
                                  direction=layer.direction,
                                  pitch_x=layer.pitch_x,
                                  pitch_y=layer.pitch_y,
@@ -108,11 +108,11 @@ class DbDataBase:
                                  spacing=layer.spacing,
                                  area=layer.area,
                                  region=layer.region,
-                                 base_layer=layer.based_layer,
+                                 based_layer=layer.based_layer,
                                  idx=_idx)
 
-    def createLayer(self, name: str, Type='custom', direction='', pitch_x=0.0, pitch_y=0.0, width=0.0, spacing=0.0, area=0.0, region=None, base_layer=None, idx=0):
-        self.layers[name] = TechLayer(name=name, type=Type, direction=direction, pitch_x=pitch_x, width=width, spacing=spacing, area=area, region=region, base_layer=base_layer, idx=idx)
+    def createLayer(self, name: str, layer_type='custom', direction='', pitch_x=0.0, pitch_y=0.0, width=0.0, spacing=0.0, area=0.0, region=None, based_layer=None, idx=0):
+        self.layers[name] = TechLayer(name=name, layer_type=layer_type, direction=direction, pitch_x=pitch_x, pitch_y=pitch_y, width=width, spacing=spacing, area=area, region=region, based_layer=based_layer, idx=idx)
 
     def __initMacro(self):
         if self.lefParser is None and self.LEF_LIST:

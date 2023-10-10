@@ -4,6 +4,10 @@ from typing import AnyStr, List, Tuple, Dict, Union, Set, Iterable, TYPE_CHECKIN
 if TYPE_CHECKING:
     pass
 
+from utils import Print
+
+Print('Loading Environment...')
+
 from ui import UiDB
 from verilog import InstExtractor
 

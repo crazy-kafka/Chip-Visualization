@@ -11,7 +11,7 @@ import sys
 import os
 import pandas as pd
 from .workspace import Workspace
-from utils import CoordinateProcess, Print
+from utils import CoordinateProcess, Print, GlobalVariable
 from dataBase.dbWire import DbWire
 from dataBase.dbInst import DbInst
 from dataBase.dbHInst import DbHInst
@@ -45,9 +45,9 @@ class MainWindow(QtWidgets.QWidget):
 
         self.workspace_layout = QtWidgets.QHBoxLayout()
 
-        self.workspaces: Dict[str, Workspace] = {}
-
+        # self.workspaces: Dict[str, Workspace] = {}
         self.tab = QtWidgets.QTabWidget()
+        self.workspace: [None, Workspace]= None
 
         self.insts: Dict[str, InstItem] = {}
         self.net_wire_dict: Dict[str, List[WireItem]] = {}
@@ -58,7 +58,7 @@ class MainWindow(QtWidgets.QWidget):
         self.__connectSignal()
 
     def __initUi(self):
-        self.setWindowTitle('XXX-LHJ')
+        self.setWindowTitle(GlobalVariable.SOFTWARE)
         self.resize(self.STARTUP_WIDTH, self.STARTUP_HEIGHT)
 
         self.workspace_layout.addWidget(self.tab, stretch=1)
@@ -102,26 +102,34 @@ class MainWindow(QtWidgets.QWidget):
             os.system(f'mkdir -p {file_name}')
             self.dataBase.saveDataBase(file_name)
 
-    def addView(self, view_name: str) -> Workspace:
-        Print(f'Add layout view << {view_name} >>')
-        workspace = Workspace(view_name, self.dataBase, parent_window=self)
-        self.workspaces[view_name] = workspace
-        self.tab.addTab(workspace, view_name)
-        self.initializeWorkspace(workspace)
-        self.connectWorkspaceSig(workspace)
-        return workspace
+    def addView(self):
+        view_name = 'physical view'
+        self.workspace = Workspace(view_name, self.dataBase, parent_window=self)
+        self.tab.addTab(self.workspace, view_name)
+        self.initializeWorkSpace()
+        self.connectWorkspaceSig()
 
-    def connectWorkspaceSig(self, workspace: Workspace):
-        workspace.view.sigSelectOneItem.connect(self.__updateSelectedStatus)
-        workspace.view.sigSceneMouseMoved.connect(lambda  pt: self.mouse_pos_status.setText(f'{round(pt.x(), 4)}, {round(pt.y(), 4)}'))
+    # def __addView(self, view_name: str) -> Workspace:
+    #     Print(f'Add layout view << {view_name} >>')
+    #     workspace = Workspace(view_name, self.dataBase, parent_window=self)
+    #     # self.workspaces[view_name] = workspace
+    #     self.workspace = workspace
+    #     self.tab.addTab(workspace, view_name)
+    #     self.initializeWorkSpace(workspace)
+    #     self.connectWorkspaceSig(workspace)
+    #     return workspace
 
-    def initializeWorkSpace(self, workspace: Workspace):
-        workspace.view.addPtn(self.dataBase.chip.hInst)
+    def connectWorkspaceSig(self):
+        self.workspace.view.sigSelectOneItem.connect(self.__updateSelectedStatus)
+        self.workspace.view.sigSceneMouseMoved.connect(lambda pt: self.mouse_pos_status.setText(f'{round(pt.x(), 4)}, {round(pt.y(), 4)}'))
+
+    def initializeWorkSpace(self):
+        self.workspace.view.addPtn(self.dataBase.chip.hInst)
         for hInst_name, hInst in self.dataBase.chip.hInst.treeHInsts.items():
             if hInst.is_ptn:
-                workspace.view.addPtn(hInst)
-        workspace.view.updateBoundingRect()
-        workspace.view.fit()
+                self.workspace.view.addPtn(hInst)
+        self.workspace.view.updateBoundingRect()
+        self.workspace.view.fit()
 
     def __updateSelectedStatus(self, select_obj: Union[DbInst, DbWire, DbHInst, None]):
         if type(select_obj) == DbInst or type(select_obj) == DbHInst:

@@ -10,7 +10,8 @@ from .instItem import InstItem
 from .wireItem import WireItem
 from PyQt5 import QtWidgets, QtCore, QtGui
 from dataBase.dbHInst import DbHInst
-from .attribuetPanel import AttributePanel
+# from .attribuetPanel import AttributePanel
+# from .attribuetPanel import AttributePanel
 
 
 class MainView(GenericGraphicsView):

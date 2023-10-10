@@ -64,7 +64,7 @@ class MapColorBar(QtWidgets.QWidget):
         self.max_v = max_v
         self.max_line_edit.setText(str(self.max_v))
 
-    def upateMin(self, min_v: float):
+    def updateMin(self, min_v: float):
         self.min_v = min_v
         self.min_line_edit.setText(str(self.min_v))
 

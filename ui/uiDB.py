@@ -32,7 +32,8 @@ class UiDB:
     def __init__(self):
         self.__db = DbDataBase()
         self.__window = MainWindow(self.__db)
-        self.__uiViews: [str, UiView] = {}
+        # self.__uiViews: [str, UiView] = {}
+        self.__uiView: [None, UiView] = None
         self.__connSignal()
 
     def __connSignal(self):
@@ -83,8 +84,9 @@ class UiDB:
         self.__db.saveDataBase(out_path, no_pin_loc=no_pin_loc, no_nl_conn=no_nl_conn)
 
     def loadDb(self, db_path: str):
-        if self.__db.loadDataBase(db_path):
-            self.addView('base')
+        self.__db.loadDataBase(db_path)
+        # if self.__db.loadDataBase(db_path):
+        #     self.addView('base')
 
     def setLefList(self, lef_list: List[str]):
         self.__db.LEF_LIST = lef_list
@@ -106,7 +108,9 @@ class UiDB:
 
     def definePartitionByDef(self, def_list: List[str], include_pins=False):
         self.__db.definePartitionByDef(def_list, include_pins=include_pins)
-        self.addView('base')
+        self.__window.addView()
+        self.__uiView = UiView(self.__db, self.__window.workspace)
+        # self.addView('base')
     '''--------------------------- basic operation tail ---------------------------'''
 
     '''--------------------------- gui operation head ---------------------------'''
@@ -117,12 +121,16 @@ class UiDB:
     def winoff(self):
         self.__window.hide()
 
-    def addView(self, view_name: str):
-        self.__uiViews[view_name] = UiView(self.__db, self.__window.addView(view_name))
+    # def addView(self, view_name: str):
+    #     self.__uiViews[view_name] = UiView(self.__db, self.__window.addView(view_name))
+
+    # @property
+    # def views(self) -> Dict[str, UiView]:
+    #     return self.__uiViews
 
     @property
-    def views(self) -> Dict[str, UiView]:
-        return self.__uiViews
+    def view(self) -> UiView:
+        return self.__uiView
     '''--------------------------- gui operation tail ---------------------------'''
 
     '''--------------------------- io timing head ---------------------------'''

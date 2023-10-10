@@ -8,9 +8,9 @@ from .dbBaseObj import DbBaseObj
 
 class TechLayer(DbBaseObj):
 
-    def __init__(self, name: str, type: str, direction: str, pitch_x: float, pitch_y: float, width: float, spacing: float, area: float, region: str, based_layer: str, idx: int):
+    def __init__(self, name: str, layer_type: str, direction: str, pitch_x: float, pitch_y: float, width: float, spacing: float, area: float, region: str, based_layer: str, idx: int):
         super(TechLayer, self).__init__(name)
-        self.__type = type
+        self.__type = layer_type
         self.__direction = direction
         self.__pitch_x = pitch_x
         self.__pitch_y = pitch_y

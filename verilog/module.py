@@ -10,9 +10,9 @@ from .modulePort import ModulePort
 from .moduleNet import ModuleNet
 from .moduleInst import ModuleInst
 
-class Module(VerilogBaseObj):
 
-    def __init__(self, module_string: str, ignore_conn):
+class Module(VerilogBaseObj):
+    def __init__(self, module_string: str, ignore_conn: bool):
         super().__init__()
         self.ignore_conn = ignore_conn
         self.__ports: Dict[str, ModulePort] = {}
@@ -25,23 +25,16 @@ class Module(VerilogBaseObj):
         module_match = CompiledRe.re_module_declare.search(lines[0])
         self.__moduleMatch(match=module_match)
         for line in lines[1:]:
-            port_match = CompiledRe.re_port_declare.search(line)
-            if port_match:
+            if port_match := CompiledRe.re_port_declare.search(line):
                 self.__portMatch(match=port_match)
+            elif net_match := CompiledRe.re_net_declare.search(line):
+                self.__netMatch(match=net_match)
+            elif inst_match := CompiledRe.re_instantiate.search(line):
+                self.__instMatch(match=inst_match)
+            elif assign_match := CompiledRe.re_assign_declare.search(line):
+                self.__assignMatch(match=assign_match)
             else:
-                net_match = CompiledRe.re_net_declare.search(line)
-                if net_match:
-                    self.__netMatch(match=net_match)
-                else:
-                    inst_match = CompiledRe.re_instantiate.search(line)
-                    if inst_match:
-                        self.__instMatch(match=inst_match)
-                    else:
-                        assign_match = CompiledRe.re_assign_declare.search(line)
-                        if assign_match:
-                            self.__assignMatch(match=assign_match)
-                        else:
-                            print(f'ERROR: Unrecognized pattern for <{line}>')
+                print(f'ERROR: Unrecognized pattern for <{line}>')
 
     def __assignMatch(self, match: Match):
         self.__assigns[match.groupdict()['lvalue']] = match.groupdict()['rvalue']
@@ -54,13 +47,12 @@ class Module(VerilogBaseObj):
                 self.__ports[port_name] = ModulePort(port_name)
 
     def __portMatch(self, match: Match):
-        match_dict = match.groupdict()
-        direction = match_dict['direction']
-        ports_name = match_dict['ports_name']
-        l_bit = match_dict['l_bit']
-        r_bit = match_dict['r_bit']
-        for port_name in [ii.strip(' ') for ii in match.groupdict()['ports_name'].split(',')]:
-            self.__ports[port_name] = ModulePort(port_name)
+        for port_name in [ii.strip(' ') for ii in match['ports_name'].split(',')]:
+            port = ModulePort(port_name)
+            port.direction = match['direction']
+            port.l_bit = match['l_bit']
+            port.r_bit = match['r_bit']
+            self.__ports[port_name] = port
 
     def __netMatch(self, match: Match):
         match_dict = match.groupdict()

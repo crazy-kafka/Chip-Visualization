@@ -12,6 +12,8 @@ class CompiledRe:
     re_module = re.compile(__MODULE__)
 
     __MODULE_NAME__ = r'(?P<module_name>[^\s;]+)'
+    re_module_name = re.compile(rf'module\s+{__MODULE_NAME__}\s+')
+
     __PORTS__ = r'(?P<ports>[^;]+)'
     __MODULE_DECLARE__ = rf'module\s+{__MODULE_NAME__}\s*\({__PORTS__}?\)'
     re_module_declare = re.compile(__MODULE_DECLARE__)

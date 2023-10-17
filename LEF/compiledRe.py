@@ -41,7 +41,7 @@ class CompiledRe:
     re_area = re.compile(rf'^\s*AREA\s+(?P<AREA>{FLOAT})\s+;')
 
     re_LEF58_type = re.compile(rf'PROPERTY LEF58_TYPE "TYPE (?P<TYPE>\S+) ;"')
-    re_LEF58_region = re.compile(rf'PROPERTY\s+LEF58_REGION\s+"\s*REGION\s+(?P<REGION>\S+)\s+BASEDLAYER\s+(?P<BASELAYER>\S+)\s*;\s*"\s+;')
+    re_LEF58_region = re.compile(rf'PROPERTY\s+LEF58_REGION\s+"\s*REGION\s+(?P<REGION>\S+)\s+BASEDLAYER\s+(?P<BASEDLAYER>\S+)\s*;\s*"\s+;')
 
     #propertydefinition
     re_property_definitions = re.compile(rf'^\s*PROPERTYDEFINITIONS')

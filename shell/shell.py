@@ -60,6 +60,7 @@ class Shell(code.InteractiveConsole):
     def write(self, data: str) -> None:
         if 'Traceback' in data:
             Print('\n' + data, level='error')
+            #raise
         elif 'Error' in data:
             Print(data)
         elif self.EXITMSG in data:
@@ -75,7 +76,7 @@ class Shell(code.InteractiveConsole):
             line += '()'
         elif line == 'win off':
             line = 'winoff()'
-        elif line.strip('\n') == 'history':
+        elif line.strip(' \n') == 'history':
             line = 'pass'
             for idx, his in enumerate(self.__histories):
                 print(f'  {idx}. {his}')

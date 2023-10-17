@@ -57,12 +57,14 @@ class Module(VerilogBaseObj):
     def __netMatch(self, match: Match):
         match_dict = match.groupdict()
         net_names = match_dict['net_name']
+        #print(match_dict)
         l_bit = match_dict['l_bit']
         r_bit = match_dict['r_bit']
-        for net_name in [ii.strip(' ') for ii in net_names.strip(',')]:
+        for net_name in [ii.strip(' ') for ii in net_names.split(',')]:
             net = ModuleNet(net_name)
             net.l_bit = l_bit
             net.r_bit = r_bit
+            self.__nets[net_name] = net
 
     def __instMatch(self, match: Match):
         match_dict = match.groupdict()
@@ -73,6 +75,10 @@ class Module(VerilogBaseObj):
 
     def port(self, port_name: AnyStr) -> ModulePort:
         return self.__ports[port_name]
+
+    def deleteInst(self, inst_name: AnyStr):
+        if inst_name in self.__insts:
+            del self.__insts[inst_name]
 
     @property
     def allPorts(self) -> Dict[str, ModulePort]:
@@ -96,8 +102,8 @@ class Module(VerilogBaseObj):
     def assigns(self) -> Dict[str, str]:
         return self.__assigns
 
-    def __repr(self):
-        return f'Module {self.name}: {len(self.__nets)} nets, {len(self.__insts)} insts, {len(self.__ports)}, {len(self.__assigns)} assigns'
+    def __repr__(self):
+        return f'Module {self.name}: {len(self.__nets)} nets, {len(self.__insts)} insts, {len(self.__ports)} ports, {len(self.__assigns)} assigns'
 
 
 

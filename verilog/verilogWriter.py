@@ -20,6 +20,8 @@ class VerilogWriter:
             self.outputs.append(f'  {port.name},')
             if port.l_bit:
                 port_def.append(f'  {port.direction} [{port.l_bit}:{port.r_bit}] {port.name};')
+            else:
+                port_def.append(f'  {port.direction} {port.name};')
         self.outputs[-1] = self.outputs[-1][:-1]
         self.outputs.append(f');')
         self.outputs += port_def

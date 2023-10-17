@@ -31,81 +31,53 @@ class TlefParser:
         cursor = -1
         while cursor < lines_len - 1:
             cursor += 1
-            layer_match = CompiledRe.re_layer_name.search(lines[cursor])
-            if layer_match:
+            if layer_match := CompiledRe.re_layer_name.search(lines[cursor]):
                 lef_layer = LefLayer(layer_match['LAYER'])
                 while True:
                     cursor += 1
-                    type_match = CompiledRe.re_layer_type.search(lines[cursor])
-                    if type_match:
+                    if type_match := CompiledRe.re_layer_type.search(lines[cursor]):
                         lef_layer.type = type_match['TYPE']
-                        continue
-                    direction_match = CompiledRe.re_layer_direction.search(lines[cursor])
-                    if direction_match:
+                    elif direction_match := CompiledRe.re_layer_direction.search(lines[cursor]):
                         lef_layer.direction = direction_match['DIRECTION']
-                        continue
-                    pitch_match = CompiledRe.re_layer_pitch.search(lines[cursor])
-                    if pitch_match:
+                    elif pitch_match := CompiledRe.re_layer_pitch.search(lines[cursor]):
                         lef_layer.pitch_x = float(pitch_match['PITCH_X'])
                         lef_layer.pitch_y = float(pitch_match['PITCH_Y'])
-                        continue
-                    width_match = CompiledRe.re_layer_width.search(lines[cursor])
-                    if width_match:
+                    elif width_match := CompiledRe.re_layer_width.search(lines[cursor]):
                         lef_layer.width = float(width_match['WIDTH'])
-                        continue
-                    min_width_match = CompiledRe.re_layer_min_width.search(lines[cursor])
-                    if min_width_match:
+                    elif min_width_match := CompiledRe.re_layer_min_width.search(lines[cursor]):
                         lef_layer.min_width = float(min_width_match['MINWIDTH'])
-                        continue
-                    max_width_match = CompiledRe.re_layer_max_width.search(lines[cursor])
-                    if max_width_match:
+                    elif max_width_match := CompiledRe.re_layer_max_width.search(lines[cursor]):
                         lef_layer.min_width = float(max_width_match['MAXWIDTH'])
-                        continue
-                    spacing_match = CompiledRe.re_layer_spacing.search(lines[cursor])
-                    if spacing_match:
+                    elif spacing_match := CompiledRe.re_layer_spacing.search(lines[cursor]):
                         lef_layer.spacing = float(spacing_match['SPACING'])
-                        continue
-                    area_match = CompiledRe.re_area.search(lines[cursor])
-                    if area_match:
+                    elif area_match := CompiledRe.re_area.search(lines[cursor]):
                         lef_layer.area = area_match['AREA']
-                        continue
-                    LEF58_type_match = CompiledRe.re_LEF58_type.search(lines[cursor])
-                    if LEF58_type_match:
+                    elif LEF58_type_match := CompiledRe.re_LEF58_type.search(lines[cursor]):
                         lef_layer.type = LEF58_type_match['TYPE']
-                        continue
-                    LEF58_region_match = CompiledRe.re_LEF58_region.search(lines[cursor])
-                    if LEF58_region_match:
+                    elif LEF58_region_match := CompiledRe.re_LEF58_region.search(lines[cursor]):
                         lef_layer.region = LEF58_region_match['REGION']
                         lef_layer.based_layer = LEF58_region_match['BASEDLAYER']
-                        continue
-                    if re.search(rf'END\s+{lef_layer.name}', lines[cursor]):
+                    elif re.search(rf'END\s+{lef_layer.name}', lines[cursor]):
                         break
                 self.__layers[lef_layer.name] = lef_layer
-                continue
-
-            property_definitions_match = CompiledRe.re_property_definitions.search(lines[cursor])
-            if property_definitions_match:
+            elif property_definitions_match := CompiledRe.re_property_definitions.search(lines[cursor]):
+                # print('property_definitions_match')
                 while True:
                     cursor += 1
-                    if CompiledRe.re_end_units.search(lines[cursor]):
+                    if CompiledRe.re_end_property_definitions.search(lines[cursor]):
                         break
-                continue
-
-            via_match = CompiledRe.re_via.search(lines[cursor])
-            if via_match:
+            elif via_match := CompiledRe.re_via.search(lines[cursor]):
+                # print('via_match')
                 while True:
                     cursor += 1
-                    if re.search(f'^\s*EMD\s+{via_match["VIA"]}', lines[cursor]):
+                    if re.search(f'^\s*END\s+{via_match["VIA"]}', lines[cursor]):
                         break
-                continue
-
-            via_rule_match = CompiledRe.re_via_rule.search(lines[cursor])
-            if via_rule_match:
+            elif via_rule_match := CompiledRe.re_via_rule.search(lines[cursor]):
+                # print('via_rule_match')
                 while True:
                     cursor += 1
-                    if re.search(f'^\s*END\s+{via_rule_match["VIARILE"]}', lines[cursor]):
+                    if re.search(f'^\s*END\s+{via_rule_match["VIARULE"]}', lines[cursor]):
                         break
-                continue
 
     @property
     def layers(self) -> Dict[str, LefLayer]:

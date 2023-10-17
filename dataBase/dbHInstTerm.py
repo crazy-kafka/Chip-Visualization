@@ -49,7 +49,7 @@ class DbHInstTerm(DbBaseObj):
 
     @property
     def upHNet(self) -> DbHNet:
-        return self.__hTerm.upHNet
+        return self.__upHNet
 
     @property
     def hInst(self) -> DbHInst:

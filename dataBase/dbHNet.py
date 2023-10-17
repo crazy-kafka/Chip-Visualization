@@ -31,7 +31,7 @@ class DbHNet(DbBaseObj):
 
     def __attachToHTerm(self, hTerm: DbHTerm):
         self.__hTerms[hTerm.name] = hTerm
-        hTerm._DbTerm__setDownHNet(self)
+        hTerm._DbHTerm__setDownHNet(self)
 
     def __setNet(self, net: DbNet):
         self.__net = net
@@ -53,8 +53,8 @@ class DbHNet(DbBaseObj):
     def net(self) -> DbNet:
         return self.__net
 
-
-
+    def __repr__(self):
+        return f'HNet {self.name}'
 
 
 

@@ -12,6 +12,7 @@ import pandas as pd
 from utils import Print
 from utils import CoordinateProcess
 
+
 class UiIoChecker:
 
     def __init__(self, workspace: Workspace, io_checker: IOChecker, check_type: bool):

@@ -43,7 +43,7 @@ class IOChecker:
         self.__composeIoInfo()
 
         self.__classifyRegularIoInfo()
-        self.__classifyFtIoInfo()
+        # self.__classifyFtIoInfo()
 
     def __preprocessIoInfo(self):
         Print(f'Preprocessing block one-side interface info dataframe and constructing total dataframe')
@@ -71,7 +71,7 @@ class IOChecker:
             if (idx + 1) % step == 0:
                 Print(f'  {(idx+1) // step}0% is done.')
             self.__iterateEndOfEnd(hNet, idx)
-            self.net_ends[idx].sort(key=lambda hInstTerm:hInstTerm.hTerm.direction, reverse=True)
+            self.net_ends[idx].sort(key=lambda hInstTerm : hInstTerm.hTerm.direction, reverse=True)
 
     def __iterateEndOfEnd(self, hNet: DbHNet, idx: int):
         for hInstTerm in hNet.hInstTerms.values():
@@ -93,14 +93,14 @@ class IOChecker:
         e_df = self.total_raw_df.loc[e]
         Print(f'  Merge start-end dataframe')
         for data_type in s_df.columns:
-            self.total_io_info_df['ref' + data_type] = s_df[data_type].values
-            self.total_io_info_df['tar' + data_type] = e_df[data_type].values
+            self.total_io_info_df['ref_' + data_type] = s_df[data_type].values
+            self.total_io_info_df['tar_' + data_type] = e_df[data_type].values
         self.total_io_info_df.index = s_df.index
         Print(f'  Split total io info dataframe to regular  type and feedthrough type')
         self.regular_io_info_df = self.total_io_info_df[~self.total_io_info_df['ref_reg_name'].str.contains('port-') & ~self.total_io_info_df['tar_reg_name'].str.contains('port-')]
         self.ft_raw_io_info_df = self.total_io_info_df[self.total_io_info_df['ref_reg_name'].str.contains('port-') | self.total_io_info_df['tar_reg_name'].str.contains('port-')]
         Print(f'  Remove regular io info CDC path')
-        self.regular_io_info_df = self.regular_io_info_df[self.regular_io_info_dict['ref_clk_period'] == self.regular_io_info_df['tar_clk_period']]
+        self.regular_io_info_df = self.regular_io_info_df[self.regular_io_info_df['ref_clk_period'] == self.regular_io_info_df['tar_clk_period']]
         Print(f'  Calculate regular io info')
         self.regular_io_info_df['total_manhattan_distance'] = self.regular_io_info_df['ref_manhattan_distance'] + self.regular_io_info_df['tar_manhattan_distance']
         self.regular_io_info_df['total_path_delay'] = self.regular_io_info_df['ref_path_delay'] + self.regular_io_info_df['tar_path_delay']
@@ -180,7 +180,7 @@ class IOChecker:
     def __classifyRegularIoInfo(self):
         Print(f'Classify regular interface info by clock domain and module2module pair')
         for clk_tuple, clk_df in self.regular_io_info_df.groupby(['ref_clk_name', 'ref_clk_period']):
-            self.regular_io_info_df[clk_tuple] = {'df': clk_df, 'uniq_df': clk_df.drop(['ref_instterm_name', 'tar_instterm_name'], axis=1).drop_duplicates(igonre_index=True),
+            self.regular_io_info_dict[clk_tuple] = {'df': clk_df, 'uniq_df': clk_df.drop(['ref_instterm_name', 'tar_instterm_name'], axis=1).drop_duplicates(ignore_index=True),
                                                   'module_pairs': {}}
             for pair, pair_df in clk_df.groupby(['ref_module', 'tar_module']):
                 self.regular_io_info_dict[clk_tuple]['module_pairs'][pair] = {'df': pair_df}
@@ -201,20 +201,20 @@ class IOChecker:
 
     def genRegularReport(self, out_dir='regular_interface_info_rpts', target_clock_domains=None, targer_module_pair=None):
         Print(f'Start to generate report to {out_dir}')
-        for clk in self.regular_io_info_df:
+        for clk in self.regular_io_info_dict:
             if target_clock_domains and clk not in target_clock_domains:
                 continue
             Print(f'Generate report for clock domain {clk}')
             self.__writeRpts(self.regular_io_info_dict[clk]['df'], f'{out_dir}/{clk[0]}_{clk[1]}')
-            for pair in self.regular_io_info_df[clk]['module_pairs']:
+            for pair in self.regular_io_info_dict[clk]['module_pairs']:
                 if target_clock_domains and pair not in targer_module_pair:
                     continue
                 Print(f'  Generate report for module pair {pair}')
-                df = self.regular_io_info_dict[clk]['module_pair'][pair]['df']
+                df = self.regular_io_info_dict[clk]['module_pairs'][pair]['df']
                 self.__writeRpts(df, f'{out_dir}/{clk[0]}_{clk[1]}/module_pairs/{pair[0]}.{pair[1]}', True)
 
     def __writeRpts(self, df: pd.DataFrame, out_dir: str, enable_detail=False):
-        os.system(f'mdkir -p {out_dir}')
+        os.system(f'mkdir -p {out_dir}')
         self.__summaryReport(df, out_dir)
         self.__distPlot(df, out_dir)
         self.__delayPlot(df, out_dir)
@@ -272,12 +272,12 @@ class IOChecker:
         file_name = f'{out_dir}/interface_info_summary.rpt'
         rd = 4
         content = []
-        dist_series = df['total_manhanttan_distance']
+        dist_series = df['total_manhattan_distance']
         delay_series = df['total_path_delay']
         skew_series = df['skew']
         slack_series = df['setup_slack']
 
-        content.append(f'Manhanttan distance(um): min: {round(dist_series.min(), rd):>10}, max: {round(dist_series.max(), rd):>10}, mean: {round(dist_series.mean(), rd):>10}')
+        content.append(f'Manhattan distance(um): min: {round(dist_series.min(), rd):>10}, max: {round(dist_series.max(), rd):>10}, mean: {round(dist_series.mean(), rd):>10}')
         content.append(f'Path delay(ns):          min: {round(delay_series.min(), rd):>10}, max: {round(delay_series.max(), rd):>10}, mean: {round(delay_series.mean(), rd):>10}')
         content.append(f'skew(ns):                min: {round(skew_series.min(), rd):>10}, max: {round(skew_series.max(), rd):>10}, mean: {round(skew_series.mean(), rd):>10}')
         content.append(f'Setup slack(ns):         min: {round(slack_series.min(), rd):>10}, max: {round(slack_series.max(), rd):>10}, mean: {round(slack_series.mean(), rd):>10}')

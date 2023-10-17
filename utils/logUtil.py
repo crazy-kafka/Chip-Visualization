@@ -11,7 +11,7 @@ from .globalVariable import GlobalVariable
 
 def setup_logger(name, log_file, format='%(asctime)s %(levelname)s %(message)s', level=logging.DEBUG, out_to_console=False):
 
-    formatter = logging.Formatter(format)
+    formatter = logging.Formatter(format, datefmt='%Y-%m-%d,%H:%M:%S')
 
     handler = logging.FileHandler(log_file, mode='w')
     handler.setFormatter(formatter)

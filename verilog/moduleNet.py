@@ -6,6 +6,7 @@ if TYPE_CHECKING:
 
 from .verilogBaseObj import VerilogBaseObj
 
+
 class ModuleNet(VerilogBaseObj):
 
     POWER = 'POWER'

@@ -142,6 +142,10 @@ class DbDataBase:
         if self.modules == {}:
             for verilogParser in map(VerilogParser, self.VERILOG_LIST):
                 for module_name, module in verilogParser.allModules().items():
+                    # remove leaf cell
+                    for inst in module.allInsts.values():
+                        if inst.name in self.cells:
+                            module.deleteInst(inst.name)
                     self.modules[module_name] = module
         if self.modules == {}:
             Print(f'Netlist is not initialized in database')
@@ -149,7 +153,7 @@ class DbDataBase:
         for _, term in self.modules[self.TOP_NAME].allPorts.items():
             for ii in term.granulate():
                 hInstTerm = self.chip.hInst.addHInstTerm(ii, term.direction)
-                self.chip.hInst.addHNet(ii)._DbHNet_attachToHTerm(hInstTerm.hTerm)
+                self.chip.hInst.addHNet(ii)._DbHNet__attachToHTerm(hInstTerm.hTerm)
 
         Print(f'Constructing netlist hierarchy')
         t0 = time.time()
@@ -160,6 +164,7 @@ class DbDataBase:
 
     def __constructHierarchy(self, current_hInst: DbHInst, level=0):
         Print('--' * level + current_hInst.cell + '|' + current_hInst.name)
+        # print(current_hInst.hNets)
         current_module = self.modules[current_hInst.cell]
         for _, net in current_module.allNets.items():
             for ii in net.granulate():
@@ -173,22 +178,23 @@ class DbDataBase:
                 child_module = self.modules[inst.cell_name]
                 child_hInst = DbHInst(name=current_hierarchy + inst_name, cell=inst.cell_name, pHInst=current_hInst)
                 current_hInst.addHInst(child_hInst)
-                current_hierarchy = current_hierarchy + inst_name
+                local_hierarchy = current_hierarchy + inst_name
 
                 if self.IGNORE_LOGICAL_CONNECTION is False:
                     for term_name, term in child_module.allPorts.items():
                         for ii in term.granulate():
                             hInstTerm = child_hInst.addHInstTerm(ii, term.direction)
-                            child_hInst.addHNet(ii)._DbHNet_attachToHTerm(hInstTerm.hTerm)
+                            child_hInst.addHNet(ii)._DbHNet__attachToHTerm(hInstTerm.hTerm)
                     for _, term in inst.allTerms.items():
+                        #print(term.name)
                         for term_name, net_name in term.granulate(pModule=current_module, cModule=child_module):
+                            #print(child_hInst.name, net_name, term_name)
                             if type(net_name) == str:
-                                current_hInst.hNets[current_hierarchy + net_name]._DbHNet__attachToHInstTerm(
-                                    child_hInst.hInstTerms[current_hierarchy + '/' + term_name])
+                                current_hInst.hNets[current_hierarchy + net_name]._DbHNet__attachToHInstTerm(child_hInst.hInstTerms[local_hierarchy + '/' + term_name])
                             elif net_name == 0:
-                                child_hInst.hInstTerms[current_hierarchy + '/' + term_name]._DbHInstTerm__setTieLo()
+                                child_hInst.hInstTerms[local_hierarchy + '/' + term_name]._DbHInstTerm__setTieLo()
                             elif net_name == 1:
-                                child_hInst.hInstTerms[current_hierarchy + '/' + term_name]._DbHInstTerm__setTieHi()
+                                child_hInst.hInstTerms[local_hierarchy + '/' + term_name]._DbHInstTerm__setTieHi()
 
                 self.__constructHierarchy(child_hInst, level + 1)
         if self.IGNORE_LOGICAL_CONNECTION is False:
@@ -207,7 +213,7 @@ class DbDataBase:
             self.__setNetToHNet(hInstTerm.downHNet, net)
 
     def __setInitNets(self, current_hInst: DbHInst):
-        Print(f'Set initial net for {current_hInst.cell} | {current_hInst.name}')
+        #Print(f'Set initial net for {current_hInst.cell} | {current_hInst.name}')
         for hNet in current_hInst.hNets.values():
             if hNet.net is None:
                 self.__setNetToHNet(hNet)
@@ -331,7 +337,7 @@ class DbDataBase:
             for ii in modules.values():
                 ii._Module__nets.clear()
                 ii._Module__ports.clear()
-                ii._Module_assigns.clear()
+                ii._Module__assigns.clear()
                 for inst in ii.allInsts.values():
                     inst._ModuleInst__term.clear()
             with open(verilog_file, 'wb') as fh:

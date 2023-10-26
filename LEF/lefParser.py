@@ -159,10 +159,10 @@ class LefParser:
 
                                 pin_shape_match = CompiledRe.re_rect.search(lef_lines[cursor])
                                 if pin_shape_match:
-                                    shape = [(float(pin_shape_match.group(1))),
-                                            (float(pin_shape_match.group(2))),
-                                            (float(pin_shape_match.group(3))),
-                                            (float(pin_shape_match.group(4)))]
+                                    shape = [(float(pin_shape_match.group(1)),
+                                            float(pin_shape_match.group(2))),
+                                            (float(pin_shape_match.group(3)),
+                                            float(pin_shape_match.group(4)))]
                                     cursor += 1
                                     continue
                                 cursor += 1

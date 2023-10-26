@@ -63,7 +63,7 @@ class MainView(GenericGraphicsView):
             for item in items:
                 if hasattr(item, 'highlight') and hasattr(item, 'db_obj'):
                     item.highlight()
-                    self.highlight_item.append(item)
+                    self.highlighted_items.append(item)
                     self.sigSelectOneItem.emit(item.db_obj)
 
     def deselectAll(self):

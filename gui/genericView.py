@@ -41,6 +41,7 @@ class GenericGraphicsView(QtWidgets.QGraphicsView):
         self.mousePressPos = None
         self.mouseReleasePos = None
         self.zoomBoxLastPos = None
+        self.scaleCenter = None
 
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
         self.setMouseTracking(True)
@@ -223,6 +224,7 @@ class GenericGraphicsView(QtWidgets.QGraphicsView):
             cur_pos = ev.pos()
             x0 = cur_pos.x()
             y0 = cur_pos.y()
+            self.mouseReleasePos = ev.pos()
             x1 = self.mouseReleasePos.x()
             y1 = self.mouseReleasePos.y()
 
@@ -235,7 +237,7 @@ class GenericGraphicsView(QtWidgets.QGraphicsView):
             else:
                 self.sigSelectPos.emit(self.mousePressPos)
 
-        super().mousePressEvent(ev)
+        super().mouseReleaseEvent(ev)
         return
 
     def mouseMoveEvent(self, ev: QtGui.QMouseEvent) -> None:

@@ -195,11 +195,11 @@ class UiDB:
     def dumpGridOffsetFile(self, block_name: str, out_file: str):
         result = []
         with open(out_file, 'w') as fh:
-            fh.write(f'# ptn_orient origin_x origin_y')
+            fh.write(f'# ptn_orient origin_x origin_y\n')
             for hInst in [hInst for hInst in self.__db.allHInsts() if hInst.cell == block_name]:
                 if not hInst.is_ptn:
                     continue
-                fh.write(f'{hInst.ptn_orient} {hInst.origin[0]} {hInst.origin[1]}')
+                fh.write(f'{hInst.ptn_orient} {hInst.origin[0]} {hInst.origin[1]}\n')
                 result.append([hInst.ptn_orient, hInst.origin[0], hInst.origin[1]])
         return result
 
@@ -245,7 +245,7 @@ class UiDB:
                 hInsts = [ii for ii in list(self.chip.hInst.treeHInsts.values()) + [self.chip.hInst] if ii.cell == block_name]
                 if not hInsts:
                     Print(f'Cannot find any partition matched block name {block_name}', level='warning')
-                def_file = info['def_file']
+                def_file = os.path.abspath(info['def_file'])
                 mapping_file = info['mapping_file']
                 ptn_info_file = f'{block_name}{ptn_info_suffix}'
                 for idx, _ in enumerate(self.dumpGridOffsetFile(block_name, ptn_info_file)):
@@ -255,7 +255,7 @@ class UiDB:
                 else:
                     fh.write(f'{block_name} {def_file} {ptn_info_file}\n')
         expected_done_files = set(expected_done_files)
-        startGrid_cmd = f'{genStatGrid_script} -m {mode} -s {spec} -l {cell_info_db} -g {grid_size} -o {statGrid_dir}'
+        startGrid_cmd = f'{sys.executable} {genStatGrid_script} -m {mode} -s {spec} -l {cell_info_db} -g {grid_size} -o {statGrid_dir}'
         cmd = f'cd {os.path.abspath(os.getcwd())} ; {startGrid_cmd}'
         print(cmd)
         os.system(cmd)

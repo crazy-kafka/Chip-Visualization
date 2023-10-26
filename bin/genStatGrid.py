@@ -78,6 +78,7 @@ class Block:
                 continue
             inst_obj = Inst()
             inst_obj.name = comp.comp_name
+            inst_obj.cell_name = comp.model_name
             inst_obj.pt_x = comp.pos_x / self.defParser.dbUnit()
             inst_obj.pt_y = comp.pos_y / self.defParser.dbUnit()
             inst_obj.orient = comp.orient
@@ -193,8 +194,8 @@ class GenStatGrid:
             if mode == 'cell_density':
                 grid_x0 = math.floor(bbox[0] / grid_size)
                 grid_y0 = math.floor(bbox[1] / grid_size)
-                grid_x1 = math.floor(bbox[2] / grid_size)
-                grid_y1 = math.floor(bbox[3] / grid_size)
+                grid_x1 = math.ceil(bbox[2] / grid_size)
+                grid_y1 = math.ceil(bbox[3] / grid_size)
                 for ii in range(grid_x0, grid_x1):
                     for jj in range(grid_y0, grid_y1):
                         GRID[(ii, jj)] += GRID_POLYGON[(ii, jj)].intersection(inst_polygon).area
@@ -233,7 +234,7 @@ class GenStatGrid:
                 for ii in range(grid_x0, grid_x1):
                     for jj in range(grid_y0, grid_y1):
                         GRID[(ii, jj)] += GRID_POLYGON[(ii, jj)].intersection(inst_polygon).area * instObj.custom_value
-            elif mode == 'density_continuous':
+            elif mode == 'value_continuous':
                 grid_x0 = math.floor(bbox[0] / grid_size)
                 grid_y0 = math.floor(bbox[1] / grid_size)
                 grid_x1 = math.ceil(bbox[2] / grid_size)
@@ -264,7 +265,7 @@ class GenStatGrid:
                 (ii * grid_size, jj * grid_size + grid_size)]
 
 if __name__ == '__main__':
-    lsf_cmd = 'bsub -q xxx.q -n1 -P xxx -R "rusage[mem=20GB]"'
+    lsf_cmd = 'bsub -q me_pd -n1 -R "rusage[mem=20GB]"'
     legal_modes = ['cell_density', 'pin_density', 'setup_slack', 'hold_slack', 'discrete', 'discrete_max', 'discrete_min', 'discrete_mean', 'density_continuous', 'value_continuous']
 
     argparser = argparse.ArgumentParser()
@@ -322,7 +323,7 @@ if __name__ == '__main__':
                     pass
                 print(f'touch {fail_file}')
         elif not args.run:
-            for idx, grid_offset_line in enumerate([ii.rstrip('\n') for ii in open(ptn_info_file).readlines() if '#' not in ii]):
+            for idx, grid_offset_line in enumerate([ii.rstrip('\n').split() for ii in open(ptn_info_file).readlines() if '#' not in ii]):
                 ptn_orient = grid_offset_line[0]
                 origin_x = float(grid_offset_line[1])
                 origin_y = float(grid_offset_line[2])
@@ -331,9 +332,9 @@ if __name__ == '__main__':
                 else:
                     log_name = f'{GenStatGrid.LOG_DIR}/{block_name}_{idx}.{args.out_dir}.log'
                 if args.out_dir:
-                    final_shell_cmd = f'/bin/bash -c \' {lsf_cmd} "{__file__} -- idx {idx} -- target_block {block_name} --run --ptn_orient {ptn_orient} --origin_x {origin_x} --origin_y {origin_y} -g {args.grid_size} -l {args.lef_db_file} -m {args.mode} -s {args.spec_file} -o {args.out_dir} &> {log_name}" \''
+                    final_shell_cmd = f'/bin/bash -c \' {lsf_cmd} "{sys.executable} {__file__} --idx {idx} --target_block {block_name} --run --ptn_orient {ptn_orient} --origin_x {origin_x} --origin_y {origin_y} -g {args.grid_size} -l {args.lef_db_file} -m {args.mode} -s {args.spec_file} -o {args.out_dir} &> {log_name}" \''
                 else:
-                    final_shell_cmd = f'/bin/bash -c \' {lsf_cmd} "{__file__} -- idx {idx} -- target_block {block_name} --run --ptn_orient {ptn_orient} --origin_x {origin_x} --origin_y {origin_y} -g {args.grid_size} -l {args.lef_db_file} -m {args.mode} -s {args.spec_file} &> {log_name}" \''
+                    final_shell_cmd = f'/bin/bash -c \' {lsf_cmd} "{sys.executable} {__file__} --idx {idx} --target_block {block_name} --run --ptn_orient {ptn_orient} --origin_x {origin_x} --origin_y {origin_y} -g {args.grid_size} -l {args.lef_db_file} -m {args.mode} -s {args.spec_file} &> {log_name}" \''
 
                 print(final_shell_cmd)
                 os.system(final_shell_cmd)

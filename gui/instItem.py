@@ -36,7 +36,7 @@ class InstItem(QtWidgets.QGraphicsPolygonItem):
     highlight_pen.setCosmetic(True)
 
     def __init__(self, db_obj: Union[DbHInst, DbInst], parent=None):
-        super(InstIterm, self).__init__(parent=parent)
+        super().__init__(parent=parent)
         self.db_obj = db_obj
         if type(db_obj) == DbHInst:
             self.toPtn()
@@ -56,7 +56,7 @@ class InstItem(QtWidgets.QGraphicsPolygonItem):
         self.setZValue(1)
 
     def deHighlight(self):
-        self.setPen(self.pen())
+        self.setPen(self.pen)
         self.setZValue(self.zvalue)
 
     def toPtn(self):

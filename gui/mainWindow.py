@@ -133,10 +133,10 @@ class MainWindow(QtWidgets.QWidget):
 
     def __updateSelectedStatus(self, select_obj: Union[DbInst, DbWire, DbHInst, None]):
         if type(select_obj) == DbInst or type(select_obj) == DbHInst:
-            self.status_bar.showMessage(select_obj.name, 10000000000000)
+            self.status_bar.showMessage(select_obj.name, 2147483647)
             self.dataBase.appendSelected(select_obj)
         elif type(select_obj) == DbWire:
-            self.status_bar.showMessage(select_obj.net.name, 10000000000000)
+            self.status_bar.showMessage(select_obj.net.name, 2147483647)
         elif select_obj is None:
             self.status_bar.clearMessage()
             self.dataBase.clearSelected()

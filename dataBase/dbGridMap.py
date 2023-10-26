@@ -18,7 +18,7 @@ class DbGridMap(DbBaseObj):
         self.grid = grid
         self.grid[np.isinf(self.grid)] = np.nan
         self.color_grid = np.zeros(self.grid.shape, dtype=int)
-        self.color_grid_image = np.zeros(self.grid.shape[0], self.grid.shape.shape[1], dtype=np.uint8)
+        self.color_grid_image = np.zeros((self.grid.shape[0], self.grid.shape[1], 4), dtype=np.uint8)
         self.grade_color = grad_colors
         self.grade_cnt = len(self.grade_color) - 1
         self.max = np.max(self.grid[~np.isnan(self.grid)])

@@ -51,7 +51,7 @@ class CompiledRe:
 
     re_db_unit = re.compile(rf'UNITS\s+DISTANCE\s+MICRONS\s+(?P<unit>\d+)\s+')
 
-    re_track = re.compile(rf'TRACKS\s+(?P<direction>X|Y)\s+(?P<offset>\d+)\s+D0\s+\d+\s+STEP\s+(?P<step>\d+)\s+(?:MASK\s+(?P<mask_num>\d)\s+(?:SAMEMASK)?\s+)?LAYER\s+(?P<layer>{NAME})')
+    re_track = re.compile(rf'TRACKS\s+(?P<direction>X|Y)\s+(?P<offset>\d+)\s+DO\s+\d+\s+STEP\s+(?P<step>\d+)\s+(?:MASK\s+(?P<mask_num>\d)\s+(?:SAMEMASK)?\s+)?LAYER\s+(?P<layer>{NAME})')
 
     re_property_definition = re.compile('PROPERTYDEFINITIONS')
     re_end_property_definition = re.compile(r'END\s+PROPERTYDEFINITIONS')

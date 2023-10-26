@@ -103,7 +103,7 @@ class DefParser:
                     continue
 
     def __extractDesignName(self, line: AnyStr):
-        design_match = CompiledRe.re_end_design.search(line)
+        design_match = CompiledRe.re_design.search(line)
         self.__design_name = design_match.groupdict()['design']
 
     def __extractDbUnit(self, line: AnyStr):
@@ -154,12 +154,12 @@ class DefParser:
         direction = track_match['direction']
         offset = int(track_match['offset'])
         step = int(track_match['step'])
-        mask = int(track_match['masknum']) if track_match['masknum'] else 0
+        mask = int(track_match['mask_num']) if track_match['mask_num'] else 0
         self.__tracks.append(DefTrack(layer_name, direction, offset, step, mask))
 
     def __extractComponents(self, line: AnyStr):
         while True:
-            if not line or CompiledRe.re_component.search(line):
+            if not line or CompiledRe.re_end_component.search(line):
                 break
             if self.skip_comp is False:
                 match = CompiledRe.re_component.search(line)

@@ -18,18 +18,23 @@ class SpefParser:
         self.nets: Dict[AnyStr, SpefNet] = {}
         self.cursor = 0
 
+        self.parseStart()
+
     def parseStart(self):
         allLines = readFileLines(self.spef_file)
-
+        line_cnt = len(allLines)
+        Print(f'Start parsing spef file {self.spef_file}, total {line_cnt} lines')
         # 0 -> name_map mode
         # 1 -> port mode
         # 2 -> net mode
         flag = 0
-        while self.cursor < len(allLines):
+        while self.cursor < line_cnt:
 
             if match := CompileRe.re_NET.search(allLines[self.cursor]):
+                flag = 2
                 net = SpefNet(match['id'], match['total_cap'])
                 while CompileRe.END_FLAG not in allLines[self.cursor]:
+                    #print(allLines[self.cursor])
                     if CompileRe.CONN_flag in allLines[self.cursor]:
                         self.__parseConn(net, allLines)
                     elif CompileRe.RES_flag in allLines[self.cursor]:

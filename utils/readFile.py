@@ -16,3 +16,12 @@ def readFile(file_name: str) -> str:
     else:
         return open(file_name).read()
 
+
+def readFileLines(file_name: str) -> List[str]:
+    if file_name.endswith('.gz'):
+        try:
+            return [ii.decode('utf-8') for ii in  gzip.open(file_name).readlines()]
+        except gzip.BadGzipFile:
+            return open(file_name).readlines()
+    else:
+        return open(file_name).readlines()

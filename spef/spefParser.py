@@ -52,7 +52,6 @@ class SpefParser:
             elif CompileRe.PORTS_FLAG in allLines[self.cursor]:
                 flag = 1
 
-
             self.cursor += 1
 
     def __parseConn(self, net: SpefNet, allLines: List[AnyStr]):

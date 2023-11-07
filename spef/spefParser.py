@@ -32,19 +32,25 @@ class SpefParser:
 
             if match := CompileRe.re_NET.search(allLines[self.cursor]):
                 flag = 2
-                net = SpefNet(match['id'], match['total_cap'])
+                try:
+                    net_name = self.name_map[match['id']]
+                except KeyError:
+                    net_name = match['id']
+                    print(match['id'])
+                net = SpefNet(net_name, float(match['total_cap']))
                 while CompileRe.END_FLAG not in allLines[self.cursor]:
                     #print(allLines[self.cursor])
+                    self.cursor += 1
                     if CompileRe.CONN_flag in allLines[self.cursor]:
                         self.__parseConn(net, allLines)
                     elif CompileRe.RES_flag in allLines[self.cursor]:
                         self.__parseRes(net, allLines)
                     elif CompileRe.CAP_flag in allLines[self.cursor]:
                         self.__parseCap(net, allLines)
-                    self.cursor += 1
-            if flag == 0:
+                self.nets[net.net_name] = net
+            elif flag == 0:
                 if match := CompileRe.re_map.search(allLines[self.cursor]):
-                    self.name_map[match['from']] = match['to']
+                    self.name_map[match['to']] = match['from']
                     self.cursor += 1
                     continue
             elif flag == 1:
@@ -65,7 +71,24 @@ class SpefParser:
         #         and CompileRe.CAP_flag not in allLines[self.cursor] \
         #         and CompileRe.RES_flag not in allLines[self.cursor]:
         while match := CompileRe.re_conn.search(allLines[self.cursor]):
-            net.addPt(match)
+            name = match['name']
+            if ':' in name:
+                ii, jj = name.split(':')
+                name = self.name_map[ii] + '/' + jj
+            else:
+                name = self.name_map[name]
+            pt_type = match['pt_type']
+            direction = match['direction']
+            x = float(match['x'])
+            y = float(match['y'])
+            cell = match['ref_name']
+            net.pts[name] = {
+                'pt_type': pt_type,
+                'direction': direction,
+                'x': x,
+                'y': y,
+                'ref_name': cell
+            }
             self.cursor += 1
 
     def __parseCap(self, net: SpefNet, allLines: List[AnyStr]):
@@ -88,4 +111,11 @@ class SpefParser:
             value = float(match['value'])
             net.setREdge(node_0, node_1, value)
             self.cursor += 1
+
+    def __repr__(self):
+        return f'''SpefParer
+  spef file: {self.spef_file}
+  net count: {len(self.nets)}
+  port count： {len(self.ports)}
+'''
 

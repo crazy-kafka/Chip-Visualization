@@ -16,21 +16,6 @@ class SpefNet(nx.DiGraph):
         self.total_cap = total_cap
         self.pts = {}
 
-    def addPt(self, match: Match):
-        name = match['name']
-        pt_type = match['pt_type']
-        direction = match['direction']
-        x = float(match['x'])
-        y = float(match['y'])
-        cell = match['cell']
-        self.pts[name] = {
-            'pt_type': pt_type,
-            'direction': direction,
-            'x': x,
-            'y': y,
-            'cell': cell
-        }
-
     def setCNode(self, idx: int, cap: float, couple_cap: float):
         if idx in self.nodes:
             if cap is None and isinstance(couple_cap, float):
@@ -46,5 +31,12 @@ class SpefNet(nx.DiGraph):
     def setREdge(self, idx_from: int, idx_to: int, res: float):
         self.add_edge(idx_from, idx_to, res=res)
 
+    def __repr__(self):
+        return f'''Spef Net
+  net name: {self.net_name}
+  total cap: {self.total_cap}
+  node count: {self.number_of_nodes()}
+  edge count: {self.number_of_edges()}
+'''
 
 

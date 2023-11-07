@@ -26,7 +26,7 @@ class CompileRe:
 
     re_NET = re.compile(rf'\*D_NET\s+(?P<id>\S+)\s+(?P<total_cap>\S+)')
     CONN_flag = '*CONN'
-    re_conn = re.compile(rf'(?P<pt_type>[IP])\s+(?P<direction>[IOB])\s+\*C\s+(?P<x>\S+)\s+(?P<y>\S+)(?:\*D\s+(?P<ref_name>\S+))?')
+    re_conn = re.compile(rf'(?P<pt_type>[IP])\s+(?P<name>\S+)\s+(?P<direction>[IOB])\s+\*C\s+(?P<x>\S+)\s+(?P<y>\S+)(?:\*D\s+(?P<ref_name>\S+))?')
     CAP_flag = '*CAP'
     re_cap = re.compile(rf'\d+\s+(?P<node>\S+)(?:\s+(?P<couple_node>\S+))?\s+(?P<value>\S+)')
     RES_flag = '*RES'

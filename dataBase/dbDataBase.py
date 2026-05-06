@@ -262,11 +262,12 @@ class DbDataBase:
                     hInst.hInstTerms[pin_name].setPt(x, y)
 
     def __derivePtnPhysicalInfo(self, module_def_dict: Dict[str, DefParser], p_block: str, p_origin=(0, 0), p_orient='N', current_hierarchy=''):
+        p_db_unit = module_def_dict[p_block].dbUnit()
+
         if current_hierarchy == '':
             shape = []
-            db_unit = module_def_dict[self.chip.hInst.cell].dbUnit()
             for ii in module_def_dict[self.chip.hInst.cell].shape():
-                shape.append((round(ii[0] / db_unit, 3), round(ii[1] / db_unit, 3)))
+                shape.append((round(ii[0] / p_db_unit, 3), round(ii[1] / p_db_unit, 3)))
 
             self.chip.hInst.definePartition(
                 shape=shape,
@@ -282,29 +283,36 @@ class DbDataBase:
             if comp.model_name not in module_def_dict:
                 continue
             defParser = module_def_dict[comp.model_name]
-            db_unit = defParser.dbUnit()
+            c_db_unit = defParser.dbUnit()
             hInst_name = current_hierarchy + '/' + comp.comp_name if current_hierarchy else comp.comp_name
-            shape = []
+
+            scale = p_db_unit / c_db_unit
+            scaled_p_origin = (p_origin[0] * scale, p_origin[1] * scale)
+
             origin = CoordinateProcess.calculateOriginByOrient(
-                ll_pt=(comp.pos_x, comp.pos_y), orient_name=comp.orient, height=defParser.getHeight(), width=defParser.getWidth()
+                ll_pt=(comp.pos_x * scale, comp.pos_y * scale),
+                orient_name=comp.orient,
+                height=defParser.getHeight(),
+                width=defParser.getWidth()
             )
-            origin = CoordinateProcess.dbTransform(trans_type='to_global', pt=origin, orient_name=p_orient, origin=p_origin)
+            origin = CoordinateProcess.dbTransform(trans_type='to_global', pt=origin, orient_name=p_orient, origin=scaled_p_origin)
             orient = Orient.mergeOrient(p_orient, comp.orient)
+
+            shape = []
             for ii in defParser.shape():
                 new_ii = CoordinateProcess.dbTransform(trans_type='to_global', pt=ii, orient_name=orient, origin=origin)
-                shape.append((round(new_ii[0] / db_unit, 3), round(new_ii[1] / db_unit, 3)))
+                shape.append((round(new_ii[0] / c_db_unit, 3), round(new_ii[1] / c_db_unit, 3)))
             pt = (min(ii[0] for ii in shape), min(ii[1] for ii in shape))
 
             self.chip.hInst.treeHInsts[hInst_name].definePartition(
                 shape=shape,
                 pt_x=round(pt[0], 3),
                 pt_y=round(pt[1], 3),
-                origin_x=round(origin[0] / db_unit, 3),
-                origin_y=round(origin[1] / db_unit, 3),
+                origin_x=round(origin[0] / c_db_unit, 3),
+                origin_y=round(origin[1] / c_db_unit, 3),
                 orient=orient,
                 area=round(Polygon(shape).area, 4)
             )
-            orient = Orient.mergeOrient(p_orient, comp.orient)
             self.__derivePtnPhysicalInfo(module_def_dict=module_def_dict, p_block=comp.model_name, p_origin=origin, p_orient=orient, current_hierarchy=hInst_name)
 
     def appendSelected(self, obj):

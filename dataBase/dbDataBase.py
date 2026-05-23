@@ -65,6 +65,48 @@ class DbDataBase:
         self.__TECH_FILE = 'tech.db'
         self.__FT_FILE = 'ft.db'
 
+    def _rebuildLayersFromParser(self):
+        if self.techLayerParser is not None:
+            idx = 1
+            for layer in self.techLayerParser.layers.values():
+                if layer.type == 'ROUTING' and layer.region is None:
+                    _idx = idx
+                    idx += 1
+                else:
+                    _idx = 0
+                self.createLayer(name=layer.name,
+                                 layer_type=layer.type,
+                                 direction=layer.direction,
+                                 pitch_x=layer.pitch_x,
+                                 pitch_y=layer.pitch_y,
+                                 width=layer.width,
+                                 spacing=layer.spacing,
+                                 area=layer.area,
+                                 region=layer.region,
+                                 based_layer=layer.based_layer,
+                                 idx=_idx)
+
+    def _rebuildCellsFromParsers(self):
+        if self.lefParser is not None:
+            if self.libParser:
+                lib_macro_dict = self.libParser.getMacros()
+            else:
+                lib_macro_dict = {}
+            for macro in self.lefParser.getMacros().values():
+                params = {
+                    'macro_name': macro.macroName(),
+                    'classType': macro.macroClass(),
+                    'width': macro.size()[0],
+                    'height': macro.size()[1],
+                    'pins': macro.pins(),
+                    'footprint': '',
+                    'leakage': 0.0
+                }
+                if macro.macroName() in lib_macro_dict:
+                    params['footprint'] = lib_macro_dict[macro.macroName()].footprint
+                    params['leakage'] = lib_macro_dict[macro.macroName()].leakage
+                self.cells[macro.macroName()] = DbMacro(**params)
+
     def initDataBase(self):
         self.chip = DbChip(top_name=self.TOP_NAME)
         self.__initTechLef()
@@ -418,6 +460,12 @@ class DbDataBase:
             Print(f'  Load {ft}')
             self.ft_db = pickle.load(open(ft, 'rb'))
 
+        # Rebuild layers and cells from the pickled parsers
+        self.layers.clear()
+        self.cells.clear()
+        self._rebuildLayersFromParser()
+        self._rebuildCellsFromParsers()
+
         self.initDataBase()
         self.definePartitionByDef([])
 
@@ -474,7 +522,7 @@ class DbDataBase:
             if inst.name in self.chip.insts:
                 Print(f'Fail to add inst {inst.name} because it already exists.', level='error')
             else:
-                self.chip._DbChip_insts[inst.name] = inst
+                self.chip._DbChip__insts[inst.name] = inst
                 out.append(inst)
         return out
 

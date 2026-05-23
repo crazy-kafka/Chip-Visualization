@@ -21,12 +21,13 @@ class ColorLabel(QtWidgets.QLabel):
     def paintEvent(self, a0: QtGui.QPaintEvent) -> None:
         super(ColorLabel, self).paintEvent(a0)
         painter = QtGui.QPainter(self)
+        gradient = QtGui.QLinearGradient(0, 0, self.WIDTH, 0)
+        n = max(len(self.colors) - 1, 1)
+        for ii, brush in enumerate(self.colors):
+            gradient.setColorAt(ii / n, brush.color())
         painter.setPen(QtGui.QPen(QtCore.Qt.NoPen))
-
-        color_width = int(self.WIDTH / len(self.colors))
-        for ii in range(0, len(self.colors)):
-            painter.setBrush(self.colors[ii])
-            painter.drawRect(ii * color_width, 0, color_width, self.HEIGHT)
+        painter.setBrush(QtGui.QBrush(gradient))
+        painter.drawRect(0, 0, self.WIDTH, self.HEIGHT)
 
 
 class MapColorBar(QtWidgets.QWidget):

@@ -56,19 +56,19 @@ class Orient:
                 new_orient['X'] = False
                 new_orient['Y'] = False
                 new_orient['R'] = (new_orient['R'] + 180) % 360
-            if new_orient['X'] is True and new_orient['R'] == 180:
+            if new_orient['R'] == 180 and new_orient['X'] is True:
                 new_orient['X'] = False
                 new_orient['Y'] = True
                 new_orient['R'] = 0
-            elif new_orient['Y'] is True and new_orient['R'] == 180:
-                new_orient['X'] = False
-                new_orient['Y'] = True
+            elif new_orient['R'] == 180 and new_orient['Y'] is True:
+                new_orient['X'] = True
+                new_orient['Y'] = False
                 new_orient['R'] = 0
-            elif new_orient['Y'] is True and new_orient['R'] == 270:
+            elif new_orient['R'] == 270 and new_orient['X'] is True:
                 new_orient['X'] = False
                 new_orient['Y'] = True
                 new_orient['R'] = 90
-            elif new_orient['Y'] is True and new_orient['R'] == 270:
+            elif new_orient['R'] == 270 and new_orient['Y'] is True:
                 new_orient['X'] = True
                 new_orient['Y'] = False
                 new_orient['R'] = 90
@@ -261,7 +261,7 @@ class PathOperation:
             delta = ((coord[0] - _coord[0]) ** 2 + (coord[1] - _coord[1]) ** 2) ** 0.5
             if total_distance + delta >= target_len:
                 delta_x = coord[0] - _coord[0]
-                delta_y = coord[0] - _coord[1]
+                delta_y = coord[1] - _coord[1]
                 out_coord = (round(delta_x * (target_len - total_distance) / delta + _coord[0], 4),
                              round(delta_y * (target_len - total_distance) / delta + _coord[1], 4))
                 return out_coord

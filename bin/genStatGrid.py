@@ -20,8 +20,8 @@ import numpy as np
 from shapely.geometry import Polygon
 import time
 
-SCRIPT_DIR = os.path.dirname(os.path.relpath(__file__))
-sys.path.append(f'{SCRIPT_DIR}/..')
+SCRIPT_DIR = os.path.dirname(os.path.realpath(__file__))
+sys.path.append(os.path.abspath(os.path.join(SCRIPT_DIR, '..')))
 
 from LEF import LefParser
 from DEF import DefParser
@@ -180,11 +180,11 @@ class GenStatGrid:
 
         inst_cnt = len(blockObj.insts)
         print(f'Fill grid with instance value, total {inst_cnt} instances.')
-        step = int(inst_cnt / 10)
+        step = max(int(inst_cnt / 10), 1)
         cnt = 0
         for inst_name, instObj in blockObj.insts.items():
             cnt += 1
-            if cnt % step == 0:
+            if step > 0 and cnt % step == 0:
                 print(f'{cnt} | {cnt//step}0% finished')
 
             inst_polygon = Polygon(instObj.shape)
@@ -264,8 +264,259 @@ class GenStatGrid:
                 (ii * grid_size + grid_size, jj * grid_size + grid_size),
                 (ii * grid_size, jj * grid_size + grid_size)]
 
+def _run_no_batch(args, out_dir):
+    """Process all hierarchy recursively from top DEF. Single .npy output."""
+    lefParser: LefParser = pickle.load(open(args.lef_db_file, 'rb'))
+    lef_macros = lefParser.getMacros()
+
+    # Build design_name -> def_file map from --no-batch-defs
+    design_def_map = {}
+    for df in args.no_batch_defs:
+        dp = DefParser(def_file=df, skip_comp=True)
+        design_def_map[dp.designName] = os.path.abspath(df)
+    # Read spec: block_name def_file [mapping_file]
+    spec_lines = [l.strip() for l in open(args.spec_file).readlines() if l.strip()]
+    if not spec_lines:
+        print('Error: empty spec file for --no-batch')
+        sys.exit(1)
+    parts = spec_lines[0].split()
+    block_name = parts[0]
+    # Determine top_def and mapping: spec format is either
+    #   block_name                            (1 field)
+    #   block_name mapping_file               (2 fields)
+    #   block_name def_file mapping_file      (3 fields)
+    top_def_file = ''
+    mapping_file = ''
+    if len(parts) == 2:
+        cand = parts[1]
+        if os.path.isfile(cand) and cand.endswith('.def'):
+            top_def_file = cand
+        else:
+            mapping_file = cand
+    elif len(parts) >= 3:
+        top_def_file = parts[1] if os.path.isfile(parts[1]) else ''
+        mapping_file = parts[2]
+    if (not top_def_file or not os.path.isfile(top_def_file)) and block_name in design_def_map:
+        top_def_file = design_def_map[block_name]
+
+    # Read mapping: flatten_name -> value
+    value_map = {}
+    if mapping_file and os.path.isfile(mapping_file):
+        for line in open(mapping_file):
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            p = line.split()
+            if len(p) >= 2:
+                try:
+                    value_map[p[0]] = float(p[1])
+                except ValueError:
+                    pass
+
+    # Initialize grid from top DEF DIEAREA
+    top_dp = DefParser(def_file=top_def_file, skip_comp=True)
+    db_unit = top_dp.dbUnit()
+    shape_pts = [(p[0] / db_unit, p[1] / db_unit) for p in top_dp.getDieArea()]
+    if len(shape_pts) == 2:
+        shape_pts = [(shape_pts[0][0], shape_pts[0][1]),
+                     (shape_pts[0][0], shape_pts[1][1]),
+                     (shape_pts[1][0], shape_pts[1][1]),
+                     (shape_pts[1][0], shape_pts[0][1])]
+    xs = [p[0] for p in shape_pts]
+    ys = [p[1] for p in shape_pts]
+    gx0 = int(math.floor(min(xs) / args.grid_size))
+    gy0 = int(math.floor(min(ys) / args.grid_size))
+    gx1 = int(math.ceil(max(xs) / args.grid_size))
+    gy1 = int(math.ceil(max(ys) / args.grid_size))
+
+    GRID = np.zeros((gy1 - gy0, gx1 - gx0))
+    GRID[:, :] = np.nan
+    _CNT = np.zeros_like(GRID)
+    chip_poly = Polygon(shape_pts)
+
+    # Build grid cell polygon cache
+    cell_cache = {}
+    for ii in range(gx0, gx1):
+        for jj in range(gy0, gy1):
+            cell = Polygon([
+                (ii * args.grid_size, jj * args.grid_size),
+                ((ii + 1) * args.grid_size, jj * args.grid_size),
+                ((ii + 1) * args.grid_size, (jj + 1) * args.grid_size),
+                (ii * args.grid_size, (jj + 1) * args.grid_size),
+            ])
+            if cell.intersects(chip_poly):
+                cell_cache[(ii - gx0, jj - gy0)] = cell
+                GRID[jj - gy0, ii - gx0] = 0.0
+
+    # Recurse from top block
+    _process_block(
+        design_name=block_name,
+        hierarchy_prefix='',
+        ptn_orient='N',
+        origin=(0.0, 0.0),
+        design_def_map=design_def_map,
+        lef_macros=lef_macros,
+        value_map=value_map,
+        GRID=GRID, _CNT=_CNT, cell_cache=cell_cache,
+        grid_size=args.grid_size, gx0=gx0, gy0=gy0,
+        mode=args.mode,
+    )
+
+    out_file = f'{out_dir}/{block_name}.npy'
+    np.save(out_file, GRID)
+    print(f'Saved no-batch grid to {out_file}, shape={GRID.shape}')
+
+
+def _process_block(design_name, hierarchy_prefix, ptn_orient, origin,
+                   design_def_map, lef_macros, value_map,
+                   GRID, _CNT, cell_cache, grid_size, gx0, gy0, mode):
+    """Recursively process a design block's components."""
+    if design_name not in design_def_map:
+        return
+    def_file = design_def_map[design_name]
+    defParser = DefParser(def_file=def_file, skip_comp=False)
+    db_unit = defParser.dbUnit()
+
+    for comp in defParser.getAllComponents():
+        model = comp.model_name
+        local_pt = (comp.pos_x / db_unit, comp.pos_y / db_unit)
+
+        if model in design_def_map:
+            block_dp = DefParser(def_file=design_def_map[model], skip_comp=True)
+            height = block_dp.getHeight() / block_dp.dbUnit()
+            width = block_dp.getWidth() / block_dp.dbUnit()
+            comp_origin = CoordinateProcess.calculateOriginByOrient(
+                ll_pt=local_pt, orient_name=comp.orient,
+                height=height, width=width)
+            global_origin = CoordinateProcess.dbTransform(
+                'to_global', comp_origin, ptn_orient, origin)
+            global_orient = Orient.mergeOrient(ptn_orient, comp.orient)
+            child_prefix = (hierarchy_prefix + '/' + comp.comp_name
+                            if hierarchy_prefix else comp.comp_name)
+            _process_block(
+                design_name=model,
+                hierarchy_prefix=child_prefix,
+                ptn_orient=global_orient,
+                origin=global_origin,
+                design_def_map=design_def_map,
+                lef_macros=lef_macros,
+                value_map=value_map,
+                GRID=GRID, _CNT=_CNT, cell_cache=cell_cache,
+                grid_size=grid_size, gx0=gx0, gy0=gy0,
+                mode=mode,
+            )
+        elif model in lef_macros:
+            cell = lef_macros[model]
+            height = cell.size()[1]
+            width = cell.size()[0]
+            comp_origin = CoordinateProcess.calculateOriginByOrient(
+                ll_pt=local_pt, orient_name=comp.orient,
+                height=height, width=width)
+            global_origin = CoordinateProcess.dbTransform(
+                'to_global', comp_origin, ptn_orient, origin)
+            global_orient = Orient.mergeOrient(ptn_orient, comp.orient)
+            macro_shape = [(0, 0), (width, 0), (width, height), (0, height)]
+            global_shape = [CoordinateProcess.dbTransform(
+                'to_global', pt, global_orient, global_origin)
+                for pt in macro_shape]
+            flat_name = (hierarchy_prefix + '/' + comp.comp_name
+                         if hierarchy_prefix else comp.comp_name)
+            _apply_cell_to_grid(
+                flat_name=flat_name, cell=cell, global_shape=global_shape,
+                value_map=value_map, GRID=GRID, _CNT=_CNT,
+                cell_cache=cell_cache, grid_size=grid_size,
+                gx0=gx0, gy0=gy0, mode=mode,
+            )
+
+
+def _apply_cell_to_grid(flat_name, cell, global_shape, value_map,
+                        GRID, _CNT, cell_cache, grid_size, gx0, gy0, mode):
+    """Apply a leaf cell's contribution to the grid based on mode."""
+    inst_poly = Polygon(global_shape)
+    inst_area = inst_poly.area
+    if inst_area == 0:
+        return
+    value = value_map.get(flat_name, 0.0)
+    bbox = inst_poly.bounds
+    ix0 = int(math.floor(bbox[0] / grid_size)) - gx0
+    iy0 = int(math.floor(bbox[1] / grid_size)) - gy0
+    ix1 = int(math.ceil(bbox[2] / grid_size)) - gx0
+    iy1 = int(math.ceil(bbox[3] / grid_size)) - gy0
+
+    if mode in ('cell_density', 'density_continuous'):
+        for ii in range(max(ix0, 0), min(ix1, GRID.shape[1])):
+            for jj in range(max(iy0, 0), min(iy1, GRID.shape[0])):
+                key = (ii, jj)
+                if key in cell_cache:
+                    isect = cell_cache[key].intersection(inst_poly).area
+                    if mode == 'cell_density':
+                        GRID[jj, ii] += isect
+                    else:
+                        GRID[jj, ii] += isect * value / inst_area
+
+    elif mode == 'pin_density':
+        for pin in cell.pins():
+            if pin.use in ('POWER', 'GROUND'):
+                continue
+            pts = pin.shape
+            cx = (pts[0][0] + pts[1][0]) / 2
+            cy = (pts[0][1] + pts[1][1]) / 2
+            gx = int(math.floor(cx / grid_size)) - gx0
+            gy = int(math.floor(cy / grid_size)) - gy0
+            if 0 <= gx < GRID.shape[1] and 0 <= gy < GRID.shape[0]:
+                if np.isnan(GRID[gy, gx]):
+                    GRID[gy, gx] = 0.0
+                GRID[gy, gx] += 1
+
+    elif mode in ('value_continuous',):
+        for ii in range(max(ix0, 0), min(ix1, GRID.shape[1])):
+            for jj in range(max(iy0, 0), min(iy1, GRID.shape[0])):
+                key = (ii, jj)
+                if key in cell_cache:
+                    GRID[jj, ii] += (cell_cache[key].intersection(inst_poly).area
+                                      * value / inst_area)
+
+    elif mode in ('discrete', 'discrete_max', 'discrete_mean',
+                  'setup_slack', 'hold_slack'):
+        cx = sum(p[0] for p in global_shape) / len(global_shape)
+        cy = sum(p[1] for p in global_shape) / len(global_shape)
+        gx = int(math.floor(cx / grid_size)) - gx0
+        gy = int(math.floor(cy / grid_size)) - gy0
+        if 0 <= gx < GRID.shape[1] and 0 <= gy < GRID.shape[0]:
+            if np.isnan(GRID[gy, gx]):
+                GRID[gy, gx] = 0.0
+            if mode == 'discrete_max':
+                GRID[gy, gx] = max(value, GRID[gy, gx])
+            elif mode == 'discrete_mean':
+                old = GRID[gy, gx]
+                GRID[gy, gx] = (old * _CNT[gy, gx] + value) / (_CNT[gy, gx] + 1)
+                _CNT[gy, gx] += 1
+            else:
+                GRID[gy, gx] += value
+
+
+def _run_single_analysis(task):
+    (idx, block_name, ptn_orient, origin_x, origin_y,
+     lef_db_file, def_file, out_dir, grid_size, mode, mapping_file) = task
+    done_file = f'{out_dir}/{block_name}_{idx}.done'
+    fail_file = f'{out_dir}/{block_name}_{idx}.fail'
+    try:
+        if mapping_file:
+            checker = GenStatGrid(lef_db_file, def_file, out_dir, mapping_file)
+        else:
+            checker = GenStatGrid(lef_db_file, def_file, out_dir)
+        checker.analyze(ptn_orient=ptn_orient, origin_x=origin_x,
+                        origin_y=origin_y, grid_size=grid_size,
+                        out_file=f'{out_dir}/{block_name}_{idx}.txt', mode=mode)
+        with open(done_file, 'w') as fh:
+            pass
+    except Exception:
+        print(traceback.format_exc())
+        with open(fail_file, 'w') as fh:
+            pass
+
+
 if __name__ == '__main__':
-    lsf_cmd = 'bsub -q me_pd -n1 -R "rusage[mem=20GB]"'
     legal_modes = ['cell_density', 'pin_density', 'setup_slack', 'hold_slack', 'discrete', 'discrete_max', 'discrete_min', 'discrete_mean', 'density_continuous', 'value_continuous']
 
     argparser = argparse.ArgumentParser()
@@ -281,6 +532,15 @@ if __name__ == '__main__':
     argparser.add_argument('-l', '--lef_db_file', required=True, type=str)
     argparser.add_argument('-o', '--out_dir', default='', type=str)
     argparser.add_argument('-g', '--grid_size', default=10, type=int, help='default = 10')
+    argparser.add_argument('--parallel', choices=['lsf', 'local'], default='lsf',
+                           help='parallel execution: lsf (batch) or local (multiprocess)')
+    argparser.add_argument('--lsf_cmd', type=str,
+                           default='bsub -q me_pd -n1 -R "rusage[mem=20GB]"',
+                           help='LSF submission command (used with --parallel lsf)')
+    argparser.add_argument('--no-batch', action='store_true',
+                           help='Process all hierarchy recursively, single mapping file with flatten names')
+    argparser.add_argument('--no-batch-defs', nargs='*', default=[],
+                           help='All DEF files in hierarchy (for --no-batch mode)')
 
     args = argparser.parse_args()
 
@@ -289,9 +549,15 @@ if __name__ == '__main__':
     else:
         out_dir = args.out_dir
 
-    os.system(f'mkdir -p {out_dir}')
-    os.system(f'rm -f {out_dir}/*done {out_dir}/*fail')
+    os.makedirs(out_dir, exist_ok=True)
+    for f in glob(f'{out_dir}/*.done') + glob(f'{out_dir}/*.fail'):
+        os.remove(f)
 
+    if args.no_batch:
+        _run_no_batch(args, out_dir)
+        sys.exit(0)
+
+    all_tasks = []
     for line in open(args.spec_file, 'r').readlines():
         line_content = line.rstrip('\n').split()
         block_name = line_content[0]
@@ -322,6 +588,17 @@ if __name__ == '__main__':
                 with open(fail_file, 'w') as fh:
                     pass
                 print(f'touch {fail_file}')
+        elif not args.run and args.parallel == 'local':
+            mapping = line_content[3] if len(line_content) >= 4 else None
+            for idx, grid_offset_line in enumerate(
+                [ii.rstrip('\n').split() for ii in open(ptn_info_file).readlines()
+                 if '#' not in ii]):
+                ptn_orient = grid_offset_line[0]
+                origin_x = float(grid_offset_line[1])
+                origin_y = float(grid_offset_line[2])
+                all_tasks.append((idx, block_name, ptn_orient, origin_x, origin_y,
+                                  args.lef_db_file, def_file, out_dir,
+                                  args.grid_size, args.mode, mapping))
         elif not args.run:
             for idx, grid_offset_line in enumerate([ii.rstrip('\n').split() for ii in open(ptn_info_file).readlines() if '#' not in ii]):
                 ptn_orient = grid_offset_line[0]
@@ -332,12 +609,19 @@ if __name__ == '__main__':
                 else:
                     log_name = f'{GenStatGrid.LOG_DIR}/{block_name}_{idx}.{args.out_dir}.log'
                 if args.out_dir:
-                    final_shell_cmd = f'/bin/bash -c \' {lsf_cmd} "{sys.executable} {__file__} --idx {idx} --target_block {block_name} --run --ptn_orient {ptn_orient} --origin_x {origin_x} --origin_y {origin_y} -g {args.grid_size} -l {args.lef_db_file} -m {args.mode} -s {args.spec_file} -o {args.out_dir} &> {log_name}" \''
+                    final_shell_cmd = f'/bin/bash -c \' {args.lsf_cmd} "{sys.executable} {__file__} --idx {idx} --target_block {block_name} --run --ptn_orient {ptn_orient} --origin_x {origin_x} --origin_y {origin_y} -g {args.grid_size} -l {args.lef_db_file} -m {args.mode} -s {args.spec_file} -o {args.out_dir} &> {log_name}" \''
                 else:
-                    final_shell_cmd = f'/bin/bash -c \' {lsf_cmd} "{sys.executable} {__file__} --idx {idx} --target_block {block_name} --run --ptn_orient {ptn_orient} --origin_x {origin_x} --origin_y {origin_y} -g {args.grid_size} -l {args.lef_db_file} -m {args.mode} -s {args.spec_file} &> {log_name}" \''
+                    final_shell_cmd = f'/bin/bash -c \' {args.lsf_cmd} "{sys.executable} {__file__} --idx {idx} --target_block {block_name} --run --ptn_orient {ptn_orient} --origin_x {origin_x} --origin_y {origin_y} -g {args.grid_size} -l {args.lef_db_file} -m {args.mode} -s {args.spec_file} &> {log_name}" \''
 
                 print(final_shell_cmd)
                 os.system(final_shell_cmd)
+
+    if all_tasks:
+        from utils import ConcurrentProcess
+        print(f'Running {len(all_tasks)} tasks with local multiprocess '
+              f'({ConcurrentProcess.PROCESS_CNT} workers)')
+        with ConcurrentProcess.MP_POOL(ConcurrentProcess.PROCESS_CNT) as pool:
+            pool.map(_run_single_analysis, all_tasks)
 
 
 

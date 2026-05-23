@@ -197,21 +197,27 @@ class DefParser:
             if not line or CompiledRe.END_PIN in line:
                 break
             pin_string = line
+            match = CompiledRe.re_pin.search(pin_string)
+            if match:
+                self._addPin(match)
             while line and ';' not in line:
                 line = self.fetchLine_method()
-                pin_string = pin_string.replace('\n', '')
+                pin_string += line.replace('\n', '')
                 match = CompiledRe.re_pin.search(pin_string)
                 if match:
-                    pin = DefPin(
-                        pin_name=match['pinName'],
-                        direction=match['direction'],
-                        layer=match['layer'],
-                        pstatus=match['pstatus'],
-                        x=int(match['x2']),
-                        y=int(match['y2']),
-                        orient=match['orient']
-                    )
-                    self.__pins[pin.pin_name] = pin
+                    self._addPin(match)
+
+    def _addPin(self, match):
+        pin = DefPin(
+            pin_name=match['pin_name'],
+            direction=match['direction'],
+            layer=match['layer'],
+            pstatus=match['pstatus'],
+            x=int(match['x2']),
+            y=int(match['y2']),
+            orient=match['orient']
+        )
+        self.__pins[pin.pin_name] = pin
 
     def __extractBlockages(self, line: AnyStr):
         blockage_lines = []

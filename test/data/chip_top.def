@@ -1,0 +1,55 @@
+DESIGN chip_top ;
+UNITS DISTANCE MICRONS 2000 ;
+DIEAREA ( 0 0 ) ( 0 1200000 ) ( 1200000 1200000 ) ( 1200000 0 ) ;
+COMPONENTS 5 ;
+  - u_core_0 core + PLACED ( 100000 100000 ) N ;
+  - u_core_1 core + PLACED ( 600000 100000 ) S ;
+  - u_core_2 core + PLACED ( 100000 600000 ) FN ;
+  - u_core_3 core + PLACED ( 600000 600000 ) FS ;
+  - u_buf_top BUFX2 + PLACED ( 1100000 200000 ) N ;
+END COMPONENTS
+PINS 6 ;
+  - clk + NET clk + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 600000 ) ( 10000 600000 ) + PLACED ( 0 600000 ) N ;
+  - rst + NET rst + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 400000 ) ( 10000 400000 ) + PLACED ( 0 400000 ) N ;
+  - out_0 + NET out_0 + DIRECTION OUTPUT + USE SIGNAL + LAYER M1 ( 1200000 200000 ) ( 1190000 200000 ) + PLACED ( 1200000 200000 ) N ;
+  - out_1 + NET out_1 + DIRECTION OUTPUT + USE SIGNAL + LAYER M2 ( 1200000 400000 ) ( 1190000 400000 ) + PLACED ( 1200000 400000 ) N ;
+  - out_2 + NET out_2 + DIRECTION OUTPUT + USE SIGNAL + LAYER M1 ( 1200000 600000 ) ( 1190000 600000 ) + PLACED ( 1200000 600000 ) N ;
+  - out_3 + NET out_3 + DIRECTION OUTPUT + USE SIGNAL + LAYER M2 ( 1200000 800000 ) ( 1190000 800000 ) + PLACED ( 1200000 800000 ) N ;
+END PINS
+NETS 9 ;
+  - clk
+    ( PIN clk ) ( u_core_0/clk ) ( u_core_1/clk ) ( u_core_2/clk ) ( u_core_3/clk )
+    + ROUTED M1 ( 10000 600000 ) ( 100000 200000 )
+    + ROUTED M1 ( 100000 200000 ) ( 600000 200000 )
+    + ROUTED M1 ( 100000 200000 ) ( 100000 700000 )
+    + ROUTED M1 ( 100000 700000 ) ( 600000 700000 )
+  ;
+  - rst
+    ( PIN rst ) ( u_core_0/rst ) ( u_core_1/rst ) ( u_core_2/rst ) ( u_core_3/rst )
+    + ROUTED M1 ( 10000 400000 ) ( 100000 250000 )
+    + ROUTED M2 ( 100000 250000 ) ( 600000 250000 )
+    + ROUTED M2 ( 100000 250000 ) ( 100000 750000 )
+    + ROUTED M2 ( 100000 750000 ) ( 600000 750000 )
+  ;
+  - core0_out
+    ( u_core_0/dout ) ( u_buf_top/A )
+    + ROUTED M1 ( 120000 500000 ) ( 1100000 200000 )
+  ;
+  - core1_out
+    ( u_core_1/dout ) ( PIN out_1 )
+    + ROUTED M2 ( 620000 500000 ) ( 1190000 400000 )
+  ;
+  - core2_out
+    ( u_core_2/dout ) ( PIN out_2 )
+    + ROUTED M1 ( 120000 1000000 ) ( 1190000 600000 )
+  ;
+  - core3_out
+    ( u_core_3/dout ) ( PIN out_3 )
+    + ROUTED M2 ( 620000 1000000 ) ( 1190000 800000 )
+  ;
+  - buf_out
+    ( u_buf_top/Y ) ( PIN out_0 )
+    + ROUTED M1 ( 1100000 200000 ) ( 1190000 200000 )
+  ;
+END NETS
+END DESIGN

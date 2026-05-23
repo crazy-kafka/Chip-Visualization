@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python -m pytest test/test_utils.py -v)",
+      "Bash(python -m pytest test/test_parsers.py -v)",
+      "Bash(python -m pip install --default-timeout=120 networkx shapely pyyaml xlsxwriter)",
+      "Bash(python -c ' *)",
+      "Bash(python -m pytest test/test_dataBase.py test/test_integration.py -v)",
+      "Bash(set QT_QPA_PLATFORM=offscreen)",
+      "Bash(python -m pytest test/ -v)",
+      "Bash(python -m pytest test/test_gui.py::TestGuiIntegration::test_addView_populates_workspace -v --tb=long)",
+      "Bash(python -B -m pytest test/test_genGridMap.py -v --tb=short)",
+      "Bash(rm -rf D:/myProject/Chip-Visualization/test/workdir)",
+      "Bash(python -B bin/photon.py -f test/scripts/test_gui_interactive.py --nolog)"
+    ]
+  }
+}

@@ -50,7 +50,7 @@ class SpefParser:
                 self.nets[net.net_name] = net
             elif flag == 0:
                 if match := CompileRe.re_map.search(allLines[self.cursor]):
-                    self.name_map[match['to']] = match['from']
+                    self.name_map[match['id']] = match['name']
                     self.cursor += 1
                     continue
             elif flag == 1:
@@ -72,10 +72,7 @@ class SpefParser:
         #         and CompileRe.RES_flag not in allLines[self.cursor]:
         while match := CompileRe.re_conn.search(allLines[self.cursor]):
             name = match['name']
-            if ':' in name:
-                ii, jj = name.split(':')
-                name = self.name_map[ii] + '/' + jj
-            else:
+            if name in self.name_map:
                 name = self.name_map[name]
             pt_type = match['pt_type']
             direction = match['direction']

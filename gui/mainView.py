@@ -14,21 +14,40 @@ from dataBase.dbHInst import DbHInst
 # from .attribuetPanel import AttributePanel
 
 
+def _generateHeatmapColors(count: int = 128) -> List[QtGui.QBrush]:
+    stops = [
+        (0.0,   QtGui.QColor(255, 255, 255)),
+        (0.1,   QtGui.QColor(255, 0, 0)),
+        (0.2,   QtGui.QColor(255, 128, 0)),
+        (0.3,   QtGui.QColor(255, 255, 0)),
+        (0.4,   QtGui.QColor(128, 255, 0)),
+        (0.5,   QtGui.QColor(0, 204, 102)),
+        (0.6,   QtGui.QColor(0, 255, 255)),
+        (0.7,   QtGui.QColor(0, 128, 255)),
+        (0.8,   QtGui.QColor(0, 0, 255)),
+        (0.9,   QtGui.QColor(0, 0, 102)),
+        (1.0,   QtGui.QColor(0, 0, 0)),
+    ]
+    colors = []
+    for i in range(count):
+        t = i / (count - 1)
+        for j in range(len(stops) - 1):
+            if stops[j][0] <= t <= stops[j + 1][0]:
+                t0, c0 = stops[j]
+                t1, c1 = stops[j + 1]
+                lt = (t - t0) / (t1 - t0)
+                r = int(c0.red()   + (c1.red()   - c0.red())   * lt)
+                g = int(c0.green() + (c1.green() - c0.green()) * lt)
+                b = int(c0.blue()  + (c1.blue()  - c0.blue())  * lt)
+                colors.append(QtGui.QBrush(QtGui.QColor(r, g, b, 150)))
+                break
+    return colors
+
+
 class MainView(GenericGraphicsView):
     sigSelectOneItem = QtCore.pyqtSignal(object)
 
-    HEATMAP_COLORS: List[QtGui.QBrush] = [QtGui.QBrush(QtGui.QColor(255, 255, 255, 150)),
-                                          QtGui.QBrush(QtGui.QColor(255, 0, 0, 155)),
-                                          QtGui.QBrush(QtGui.QColor(255, 128, 0, 150)),
-                                          QtGui.QBrush(QtGui.QColor(255, 255, 0, 150)),
-                                          QtGui.QBrush(QtGui.QColor(128, 255, 0, 150)),
-                                          QtGui.QBrush(QtGui.QColor(0, 204, 102, 150)),
-                                          QtGui.QBrush(QtGui.QColor(0, 255, 255, 150)),
-                                          QtGui.QBrush(QtGui.QColor(0, 128, 255, 150)),
-                                          QtGui.QBrush(QtGui.QColor(0, 0, 255, 150)),
-                                          QtGui.QBrush(QtGui.QColor(0, 0, 102, 150)),
-                                          QtGui.QBrush(QtGui.QColor(0, 0, 52, 150)),
-                                          QtGui.QBrush(QtGui.QColor(0, 0, 0, 150))]
+    HEATMAP_COLORS: List[QtGui.QBrush] = _generateHeatmapColors(128)
 
     def __init__(self, db: DbDataBase, view_tag: str, parent=None):
         super(MainView, self).__init__(parent=parent)

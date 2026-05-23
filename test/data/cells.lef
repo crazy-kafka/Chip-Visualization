@@ -1,0 +1,203 @@
+MACRO BUFX2
+  CLASS CORE ;
+  SIZE 0.5 BY 1.0 ;
+  PIN A
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.3 0.1 0.7 ;
+  END A
+  PIN Y
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.4 0.3 0.5 0.7 ;
+  END Y
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    LAYER M1 ;
+      RECT 0.1 0.0 0.4 0.2 ;
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    LAYER M1 ;
+      RECT 0.1 0.8 0.4 1.0 ;
+  END VSS
+END BUFX2
+
+MACRO DFF
+  CLASS CORE ;
+  SIZE 0.8 BY 1.2 ;
+  PIN D
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.4 0.1 0.8 ;
+  END D
+  PIN CK
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.2 0.1 0.3 ;
+  END CK
+  PIN Q
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.7 0.4 0.8 0.8 ;
+  END Q
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    LAYER M1 ;
+      RECT 0.1 0.0 0.7 0.2 ;
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    LAYER M1 ;
+      RECT 0.1 1.0 0.7 1.2 ;
+  END VSS
+END DFF
+
+MACRO NAND2
+  CLASS CORE ;
+  SIZE 0.4 BY 0.8 ;
+  PIN A
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.2 0.1 0.4 ;
+  END A
+  PIN B
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.4 0.1 0.6 ;
+  END B
+  PIN Y
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.3 0.3 0.4 0.5 ;
+  END Y
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    LAYER M1 ;
+      RECT 0.1 0.0 0.3 0.2 ;
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    LAYER M1 ;
+      RECT 0.1 0.6 0.3 0.8 ;
+  END VSS
+END NAND2
+
+MACRO INV
+  CLASS CORE ;
+  SIZE 0.3 BY 0.6 ;
+  PIN A
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.15 0.1 0.45 ;
+  END A
+  PIN Y
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.2 0.15 0.3 0.45 ;
+  END Y
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    LAYER M1 ;
+      RECT 0.05 0.0 0.25 0.1 ;
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    LAYER M1 ;
+      RECT 0.05 0.5 0.25 0.6 ;
+  END VSS
+END INV
+
+MACRO NOR2
+  CLASS CORE ;
+  SIZE 0.5 BY 0.9 ;
+  PIN A
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.2 0.1 0.4 ;
+  END A
+  PIN B
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.5 0.1 0.7 ;
+  END B
+  PIN Y
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.4 0.35 0.5 0.55 ;
+  END Y
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    LAYER M1 ;
+      RECT 0.1 0.0 0.4 0.15 ;
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    LAYER M1 ;
+      RECT 0.1 0.75 0.4 0.9 ;
+  END VSS
+END NOR2
+
+MACRO MUX2
+  CLASS CORE ;
+  SIZE 0.7 BY 1.2 ;
+  PIN A
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.3 0.1 0.5 ;
+  END A
+  PIN B
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.7 0.1 0.9 ;
+  END B
+  PIN S
+    DIRECTION INPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.0 0.15 0.1 0.25 ;
+  END S
+  PIN Y
+    DIRECTION OUTPUT ;
+    USE SIGNAL ;
+    LAYER M1 ;
+      RECT 0.6 0.5 0.7 0.7 ;
+  END Y
+  PIN VDD
+    DIRECTION INOUT ;
+    USE POWER ;
+    LAYER M1 ;
+      RECT 0.1 0.0 0.6 0.15 ;
+  END VDD
+  PIN VSS
+    DIRECTION INOUT ;
+    USE GROUND ;
+    LAYER M1 ;
+      RECT 0.1 1.05 0.6 1.2 ;
+  END VSS
+END MUX2

@@ -2,3 +2,17 @@ __pycache__/
 */__pycache__/
 .idea
 */.ipynb_checkpoints
+
+# pytest
+.pytest_cache/
+
+# test-generated images
+heatmap_comparison.png
+heatmap_gradient_comparison.png
+
+# test-generated data
+*.done
+*.fail
+
+# test working directory (interactive GUI artifacts)
+test/workdir/

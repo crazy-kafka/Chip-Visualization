@@ -1,0 +1,30 @@
+*SPEF "IEEE 1481-1999"
+*DESIGN "test_design"
+*DATE "Mon May 23 12:00:00 2026"
+*VENDOR "Test"
+*PROGRAM "Test"
+*VERSION "1.0"
+*DESIGN_FLOW "test"
+*DIVIDER /
+*DELIMITER :
+*BUS_DELIMITER []
+*T_UNIT 1 NS
+*C_UNIT 1 PF
+*R_UNIT 1 OHM
+*L_UNIT 1 HENRY
+
+*NAME_MAP
+*1 A
+*2 B
+*3 Y
+
+*D_NET net1 0.005
+*CONN
+*I 1 I *C 0 0 *L 0.5
+*P 2 O *C 10 0 *L 0.5
+*CAP
+1 0.003
+2 0.002
+*RES
+1 2 5.0
+*END

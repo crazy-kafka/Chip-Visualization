@@ -203,7 +203,10 @@ class UiDB:
                 result.append([hInst.ptn_orient, hInst.origin[0], hInst.origin[1]])
         return result
 
-    def genGridMapArray(self, out_file: str, mode: str, grid_size: int, spec_dict: Dict[str, Dict[str, str]]):
+    def genGridMapArray(self, out_file: str, mode: str, grid_size: int,
+                         spec_dict: Dict[str, Dict[str, str]],
+                         use_lsf: bool = True, lsf_cmd: str = None,
+                         no_batch: bool = False):
         legal_modes = ['cell_density', 'pin_density', 'setup_slack', 'hold_slack', 'discrete', 'discrete_max', 'discrete_mean', 'density_continuous', 'value_continuous']
         '''
         spec_dict:
@@ -217,20 +220,61 @@ class UiDB:
             Print(f'Illegal mode "{mode}", please select on in {legal_modes}', level='error')
             return
 
+        genStatGrid_script = os.path.join(os.path.dirname(__SCRIPT_DIR__), 'bin', 'genStatGrid.py')
+        cell_info_db = 'cell_info.db'
+        if not os.path.isfile(cell_info_db):
+            with open(cell_info_db, 'wb') as fh:
+                pickle.dump(self.__db.lefParser, fh)
+
+        if no_batch:
+            if len(spec_dict) < 1:
+                Print('no_batch mode requires at least one spec entry', level='error')
+                return
+            block_name = list(spec_dict.keys())[0]
+            info = list(spec_dict.values())[0]
+            mapping_file = info.get('mapping_file', '')
+            # Collect def_files from spec_dict for --no-batch-defs
+            def_list = [info.get('def_file', '') for info in spec_dict.values()]
+            def_list = [d for d in def_list if d]
+            spec_file = f'{out_file.replace(".npy", "")}.spec'
+            with open(spec_file, 'w') as fh:
+                fh.write(block_name)
+                if mapping_file:
+                    fh.write(f' X {os.path.abspath(mapping_file)}')
+                fh.write('\n')
+            if not def_list:
+                def_list = [os.path.abspath(info.get('def_file', ''))
+                            for info in spec_dict.values()]
+                def_list = [d for d in def_list if d and os.path.isfile(d)]
+            run_cwd = os.path.abspath(os.getcwd())
+            no_batch_cmd = [sys.executable, genStatGrid_script,
+                            '-m', mode, '-s', spec_file,
+                            '-l', cell_info_db, '-g', str(grid_size),
+                            '-o', os.path.dirname(out_file) or '.',
+                            '--no-batch', '--no-batch-defs'] + def_list
+            import subprocess
+            subprocess.run(no_batch_cmd, cwd=run_cwd)
+            # genStatGrid --no-batch saves {block_name}.npy in out_dir
+            src = os.path.join(os.path.dirname(out_file) or '.',
+                               f'{block_name}.npy')
+            if os.path.exists(src) and os.path.abspath(src) != os.path.abspath(out_file):
+                if os.path.exists(out_file):
+                    os.remove(out_file)
+                os.rename(src, out_file)
+            return
+
         workdir = f'genGridArray'
         cwd = os.getcwd()
-        os.system(f'mkdir -p {workdir}')
+        os.makedirs(workdir, exist_ok=True)
         os.chdir(workdir)
-        os.system(f'mkdir -p logs')
+        os.makedirs('logs', exist_ok=True)
         Print(f'Create workdir {workdir} and change current directory to it')
 
         ptn_info_suffix = '.ptn_info'
         statGrid_dir = f'StatGrid_{out_file.replace(".npy", "")}'
 
-        genStatGrid_script = __SCRIPT_DIR__ + '/../bin/genStatGrid.py'
-        mergeGridMap_script = __SCRIPT_DIR__ + '/../bin/mergeGridMap_script'
+        mergeGridMap_script = os.path.join(os.path.dirname(__SCRIPT_DIR__), 'bin', 'mergeGridMap_script')
 
-        cell_info_db = 'cell_info.db'
         if not os.path.isfile(cell_info_db):
             Print(f'Dump cell info db')
             with open(cell_info_db, 'wb') as fh:
@@ -255,10 +299,19 @@ class UiDB:
                 else:
                     fh.write(f'{block_name} {def_file} {ptn_info_file}\n')
         expected_done_files = set(expected_done_files)
-        startGrid_cmd = f'{sys.executable} {genStatGrid_script} -m {mode} -s {spec} -l {cell_info_db} -g {grid_size} -o {statGrid_dir}'
-        cmd = f'cd {os.path.abspath(os.getcwd())} ; {startGrid_cmd}'
-        print(cmd)
-        os.system(cmd)
+        parallel_flag = 'lsf' if use_lsf else 'local'
+        startGrid_cmd = (f'{sys.executable} {genStatGrid_script} -m {mode} -s {spec} '
+                         f'-l {cell_info_db} -g {grid_size} -o {statGrid_dir} '
+                         f'--parallel {parallel_flag}')
+        if lsf_cmd:
+            startGrid_cmd += f' --lsf_cmd "{lsf_cmd}"'
+        run_cwd = os.path.abspath(os.getcwd())
+        print(f'[cwd={run_cwd}] {startGrid_cmd}')
+        import subprocess
+        if use_lsf:
+            subprocess.Popen(startGrid_cmd, cwd=run_cwd, shell=True)
+        else:
+            subprocess.run(startGrid_cmd, cwd=run_cwd, shell=True)
         waiting_period = 30
         timeout = 3600
         t0 = time.time()
@@ -277,7 +330,7 @@ class UiDB:
             done_ptns = [os.path.basename(ii).split(".")[0] for ii in current_done_file]
             fail_ptns = [os.path.basename(ii).split(".")[0] for ii in current_failed_file]
             remained_ptns = [ii for ii in all_ptns if ii not in done_ptns and ii not in fail_ptns]
-            if len(expected_done_files) - len(current_done_file) - len(current_done_file) < 5:
+            if len(expected_done_files) - len(current_done_file) - len(current_failed_file) < 5:
                 Print(f'{remained_ptns} remained')
 
             if len(current_done_file) + len(current_failed_file) == len(expected_done_files):

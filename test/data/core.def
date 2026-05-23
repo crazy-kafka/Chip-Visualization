@@ -1,0 +1,62 @@
+DESIGN core ;
+UNITS DISTANCE MICRONS 2000 ;
+DIEAREA ( 0 0 ) ( 0 500000 ) ( 500000 500000 ) ( 500000 0 ) ;
+COMPONENTS 7 ;
+  - u_alu_0 alu + PLACED ( 20000 20000 ) N ;
+  - u_alu_1 alu + PLACED ( 280000 20000 ) S ;
+  - u_alu_2 alu + PLACED ( 20000 280000 ) FN ;
+  - u_alu_3 alu + PLACED ( 280000 280000 ) FS ;
+  - u_nand0 NAND2 + PLACED ( 200000 120000 ) N ;
+  - u_nand1 NAND2 + PLACED ( 300000 350000 ) S ;
+  - u_nor0 NOR2 + PLACED ( 400000 400000 ) FN ;
+END COMPONENTS
+PINS 3 ;
+  - clk + NET clk + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 100000 ) ( 5000 100000 ) + PLACED ( 0 100000 ) N ;
+  - rst + NET rst + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 150000 ) ( 5000 150000 ) + PLACED ( 0 150000 ) N ;
+  - dout + NET dout + DIRECTION OUTPUT + USE SIGNAL + LAYER M1 ( 500000 400000 ) ( 495000 400000 ) + PLACED ( 500000 400000 ) N ;
+END PINS
+NETS 10 ;
+  - clk
+    ( PIN clk ) ( u_alu_0/clk ) ( u_alu_1/clk ) ( u_alu_2/clk ) ( u_alu_3/clk )
+    + ROUTED M1 ( 5000 100000 ) ( 20000 50000 )
+    + ROUTED M2 ( 20000 50000 ) ( 280000 50000 )
+    + ROUTED M2 ( 20000 50000 ) ( 20000 320000 )
+    + ROUTED M1 ( 20000 320000 ) ( 280000 320000 )
+  ;
+  - rst
+    ( PIN rst ) ( u_alu_0/rst ) ( u_alu_1/rst ) ( u_alu_2/rst ) ( u_alu_3/rst )
+    + ROUTED M1 ( 5000 150000 ) ( 20000 80000 )
+    + ROUTED M2 ( 20000 80000 ) ( 280000 80000 )
+    + ROUTED M2 ( 20000 80000 ) ( 20000 350000 )
+    + ROUTED M1 ( 20000 350000 ) ( 280000 350000 )
+  ;
+  - alu0_out
+    ( u_alu_0/dout ) ( u_nand0/A )
+    + ROUTED M1 ( 30000 120000 ) ( 200000 120000 )
+  ;
+  - alu1_out
+    ( u_alu_1/dout ) ( u_nand0/B )
+    + ROUTED M1 ( 290000 120000 ) ( 200000 130000 )
+  ;
+  - alu2_out
+    ( u_alu_2/dout ) ( u_nand1/A )
+    + ROUTED M1 ( 30000 380000 ) ( 300000 350000 )
+  ;
+  - alu3_out
+    ( u_alu_3/dout ) ( u_nand1/B )
+    + ROUTED M1 ( 290000 380000 ) ( 300000 360000 )
+  ;
+  - nand0_out
+    ( u_nand0/Y ) ( u_nor0/A )
+    + ROUTED M1 ( 205000 130000 ) ( 400000 400000 )
+  ;
+  - nand1_out
+    ( u_nand1/Y ) ( u_nor0/B )
+    + ROUTED M1 ( 305000 360000 ) ( 400000 390000 )
+  ;
+  - dout_net
+    ( u_nor0/Y ) ( PIN dout )
+    + ROUTED M1 ( 405000 400000 ) ( 495000 400000 )
+  ;
+END NETS
+END DESIGN

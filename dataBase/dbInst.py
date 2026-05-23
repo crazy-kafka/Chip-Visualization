@@ -87,6 +87,14 @@ class DbInst(DbBaseObj):
     def pt_y(self) -> float:
         return self.__pt_y
 
+    @property
+    def origin(self) -> Tuple[float, float]:
+        return self.__origin
+
+    @property
+    def shape(self) -> List[Tuple[float, float]]:
+        return self.__shape
+
 
 
 

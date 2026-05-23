@@ -29,7 +29,7 @@ class TechLayer(DbBaseObj):
 
     @property
     def type(self) -> str:
-        return self.__direction
+        return self.__type
 
     @property
     def pitch_x(self) -> float:
@@ -70,7 +70,7 @@ Lef Layer {self.name}
     width       {self.__width}
     spacing     {self.__spacing}
     area        {self.__area}
-    region      {self.__area}
+    region      {self.__region}
     based_layer {self.__based_layer}
 '''
 

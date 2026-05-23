@@ -18,7 +18,7 @@ class CompileRe:
     re_DATE = re.compile(rf'\*DESIGN\s+(?P<DATE>\S+)')
 
     NAME_MAP_FLAG = '*NAME_MAP'
-    re_map = re.compile(rf'(?P<to>\S+)\s+(?P<from>\S+)')
+    re_map = re.compile(rf'\*(?P<id>{__INTEGER__})\s+(?P<name>{__NAME__})')
 
     PORTS_FLAG = '*PORTS'
     re_port = re.compile(rf'(?P<idx>\S+)\s+(?P<direction>\S+)')
@@ -26,7 +26,7 @@ class CompileRe:
 
     re_NET = re.compile(rf'\*D_NET\s+(?P<id>\S+)\s+(?P<total_cap>\S+)')
     CONN_flag = '*CONN'
-    re_conn = re.compile(rf'(?P<pt_type>[IP])\s+(?P<name>\S+)\s+(?P<direction>[IOB])\s+\*C\s+(?P<x>\S+)\s+(?P<y>\S+)(?:\*D\s+(?P<ref_name>\S+))?')
+    re_conn = re.compile(rf'\*(?P<pt_type>[IP])\s+(?P<name>\S+)\s+(?P<direction>[IOB])\s+\*C\s+(?P<x>\S+)\s+(?P<y>\S+)(?:\*D\s+(?P<ref_name>\S+))?')
     CAP_flag = '*CAP'
     re_cap = re.compile(rf'\d+\s+(?P<node>\S+)(?:\s+(?P<couple_node>\S+))?\s+(?P<value>\S+)')
     RES_flag = '*RES'

@@ -11,17 +11,17 @@ class CompiledRe:
 
     NAME = r'[_\w\d\/]+'
     PINNAME = r'[_\w\d\[\]]+'
-    INTEGER = r'(?:-)?\d'
+    INTEGER = r'-?\d+'
     COMPONENTS_PART = r'COMPINENTS \D+ ;(.*)END COMPONENTS'
     PSTATUS = r'\+ (?P<pstatus>FIXED|COVERED|PLACED)'
     DIRECTION = r'\+\s+DIRECTION\s+(?P<direction>INPUT|OUTPUT|INOUT)'
     USE = r'\+\s+USE\s+(?P<use>ANALOG|CLOCK|GROUND|POWER|RESET|SCAN|SIGNAL|TIEOFF)'
     LAYER = rf'\+\s+LAYER\s+(?P<layer>{NAME})'
 
-    PT = rf'\(\s+(?P<x>{INTEGER}+)\s+(?P<y>{INTEGER}+)\s+\)'
-    PT0 = rf'\(\s+(?P<x0>{INTEGER}+)\s+(?P<y0>{INTEGER}+)\s+\)'
-    PT1 = rf'\(\s+(?P<x1>{INTEGER}+)\s+(?P<y1>{INTEGER}+)\s+\)'
-    PT2 = rf'\(\s+(?P<x2>{INTEGER}+)\s+(?P<y2>{INTEGER}+)\s+\)'
+    PT = rf'\(\s+(?P<x>{INTEGER})\s+(?P<y>{INTEGER})\s+\)'
+    PT0 = rf'\(\s+(?P<x0>{INTEGER})\s+(?P<y0>{INTEGER})\s+\)'
+    PT1 = rf'\(\s+(?P<x1>{INTEGER})\s+(?P<y1>{INTEGER})\s+\)'
+    PT2 = rf'\(\s+(?P<x2>{INTEGER})\s+(?P<y2>{INTEGER})\s+\)'
     re_pt = re.compile(PT)
 
     ORIENT = r'(?P<orient>N|S|W|E|FN|FS|FW|FE)'

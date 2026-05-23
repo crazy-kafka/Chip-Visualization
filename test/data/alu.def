@@ -1,0 +1,63 @@
+DESIGN alu ;
+UNITS DISTANCE MICRONS 2000 ;
+DIEAREA ( 0 0 ) ( 0 200000 ) ( 200000 200000 ) ( 200000 0 ) ;
+COMPONENTS 8 ;
+  - u_adder adder + PLACED ( 10000 10000 ) N ;
+  - u_buf_lo BUFX2 + PLACED ( 150000 20000 ) S ;
+  - u_buf_hi BUFX2 + PLACED ( 150000 160000 ) FN ;
+  - u_dff_0 DFF + PLACED ( 10000 150000 ) FS ;
+  - u_inv_0 INV + PLACED ( 80000 80000 ) N ;
+  - u_nand2 NAND2 + PLACED ( 80000 150000 ) FS ;
+  - u_nand3 NAND2 + PLACED ( 150000 80000 ) S ;
+  - u_buf_out BUFX2 + PLACED ( 100000 180000 ) FN ;
+END COMPONENTS
+PINS 3 ;
+  - clk + NET clk + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 30000 ) ( 5000 30000 ) + PLACED ( 0 30000 ) N ;
+  - rst + NET rst + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 50000 ) ( 5000 50000 ) + PLACED ( 0 50000 ) N ;
+  - dout + NET dout + DIRECTION OUTPUT + USE SIGNAL + LAYER M1 ( 200000 180000 ) ( 195000 180000 ) + PLACED ( 200000 180000 ) N ;
+END PINS
+NETS 9 ;
+  - clk
+    ( PIN clk ) ( u_adder/clk ) ( u_dff_0/CK )
+    + ROUTED M1 ( 5000 30000 ) ( 10000 20000 )
+    + ROUTED M1 ( 10000 20000 ) ( 10000 152000 )
+  ;
+  - rst
+    ( PIN rst ) ( u_adder/rst ) ( u_inv_0/A )
+    + ROUTED M1 ( 5000 50000 ) ( 10000 30000 )
+    + ROUTED M1 ( 10000 30000 ) ( 80000 80000 )
+  ;
+  - sum_out
+    ( u_adder/sum ) ( u_buf_lo/A )
+    + ROUTED M1 ( 20000 70000 ) ( 150000 20000 )
+  ;
+  - buf0_out
+    ( u_buf_lo/Y ) ( u_buf_hi/A )
+    + ROUTED M1 ( 150000 20000 ) ( 150000 160000 )
+  ;
+  - buf1_out
+    ( u_buf_hi/Y ) ( u_dff_0/D )
+    + ROUTED M1 ( 150000 160000 ) ( 10000 158000 )
+  ;
+  - dff_out
+    ( u_dff_0/Q ) ( u_nand2/A )
+    + ROUTED M1 ( 18000 158000 ) ( 80000 150000 )
+  ;
+  - inv_out
+    ( u_inv_0/Y ) ( u_nand2/B )
+    + ROUTED M1 ( 83000 80000 ) ( 80000 155000 )
+  ;
+  - nand0_out
+    ( u_nand2/Y ) ( u_nand3/A )
+    + ROUTED M1 ( 85000 155000 ) ( 150000 80000 )
+  ;
+  - final_out
+    ( u_nand3/Y ) ( u_buf_out/A )
+    + ROUTED M1 ( 155000 85000 ) ( 100000 180000 )
+  ;
+  - dout_net
+    ( u_buf_out/Y ) ( PIN dout )
+    + ROUTED M1 ( 105000 180000 ) ( 195000 180000 )
+  ;
+END NETS
+END DESIGN

@@ -21,7 +21,7 @@ from utils import Print, GlobalVariable
 class Shell(code.InteractiveConsole):
 
     INIT = 'import sys, os;print("Python", sys.version);sys.ps1="\x01\x1b[1;49;33m\x02>>>\x01\x1b[0m\x02 ";sys.ps="\x01\x1b[1;49;31m\x02...\x01\x1b[0m\x02 ";'
-    BUILDIN_CMDs = [f'{os.path.dirname(__file__)}/proton_command.py']
+    BUILDIN_CMDs = [os.path.abspath(os.path.join(os.path.dirname(__file__), 'proton_command.py'))]
     BANNER = '\nWelcome to photon Shell :)'
     EXITMSG = 'Now exiting photon...'
 

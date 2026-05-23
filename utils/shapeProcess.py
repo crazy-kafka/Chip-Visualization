@@ -37,12 +37,12 @@ def polygonPartitioning(_V: List[Tuple[float, float]], mode='hrect', rects: List
         Pl = V_lowermost[1] ; xl = Pl[0] ; yl = Pl[1]
 
         for y_value in y_sorted[1:]:
-            pts = sorted([ii for ii in V if ii[1] == y_value and xl <= ii[0] <= xl], key=lambda  x: x[0])
+            pts = sorted([ii for ii in V if ii[1] == y_value and xk <= ii[0] <= xl], key=lambda  x: x[0])
             if len(pts) >= 1:
                 Pm = pts[0]
                 ym = y_value
                 break
-        rects.append((xl, yk, xl, ym))
+        rects.append((xk, yk, xl, ym))
         V.remove(Pk)
         V.remove(Pl)
 

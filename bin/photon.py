@@ -11,7 +11,7 @@ import argparse
 from PyQt5 import QtWidgets
 import pydoc
 pydoc.pager = pydoc.plainpager
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + '/..')
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..')))
 from shell import Shell
 from utils import logInitialize
 

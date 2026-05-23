@@ -1,0 +1,26 @@
+DESIGN top ;
+UNITS DISTANCE MICRONS 2000 ;
+DIEAREA ( 0 0 ) ( 0 100000 ) ( 100000 100000 ) ( 100000 0 ) ;
+COMPONENTS 2 ;
+  - u_sub sub + PLACED ( 20000 20000 ) N ;
+  - u_buf BUFX2 + PLACED ( 70000 70000 ) N ;
+END COMPONENTS
+PINS 2 ;
+  - clk + NET clk + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 50000 ) ( 5000 50000 ) + PLACED ( 0 50000 ) N ;
+  - out + NET out + DIRECTION OUTPUT + USE SIGNAL + LAYER M1 ( 100000 50000 ) ( 95000 50000 ) + PLACED ( 100000 50000 ) N ;
+END PINS
+NETS 3 ;
+  - net_clk
+    ( PIN clk ) ( u_sub/clk )
+    + ROUTED M1 ( 5000 50000 ) ( 20000 45000 )
+  ;
+  - net_n0
+    ( u_sub/sig_out ) ( u_buf/A )
+    + ROUTED M1 ( 20000 55000 ) ( 70000 75000 )
+  ;
+  - net_out
+    ( u_buf/Y ) ( PIN out )
+    + ROUTED M1 ( 70000 75000 ) ( 95000 50000 )
+  ;
+END NETS
+END DESIGN

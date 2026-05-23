@@ -1,0 +1,44 @@
+library (test_lib) {
+  cell (BUFX2) {
+    area : 0.5 ;
+    cell_footprint : "buf" ;
+    leakage_power () {
+      value : 0.001 ;
+    }
+  }
+  cell (DFF) {
+    area : 0.96 ;
+    cell_footprint : "sdf" ;
+    leakage_power () {
+      value : 0.002 ;
+    }
+  }
+  cell (NAND2) {
+    area : 0.32 ;
+    cell_footprint : "nand2" ;
+    leakage_power () {
+      value : 0.0008 ;
+    }
+  }
+  cell (INV) {
+    area : 0.18 ;
+    cell_footprint : "inv" ;
+    leakage_power () {
+      value : 0.0005 ;
+    }
+  }
+  cell (NOR2) {
+    area : 0.45 ;
+    cell_footprint : "nor2" ;
+    leakage_power () {
+      value : 0.0012 ;
+    }
+  }
+  cell (MUX2) {
+    area : 0.84 ;
+    cell_footprint : "mux2" ;
+    leakage_power () {
+      value : 0.003 ;
+    }
+  }
+}

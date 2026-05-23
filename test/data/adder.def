@@ -1,0 +1,68 @@
+DESIGN adder ;
+UNITS DISTANCE MICRONS 2000 ;
+DIEAREA ( 0 0 ) ( 0 120000 ) ( 120000 120000 ) ( 120000 0 ) ;
+COMPONENTS 10 ;
+  - u_buf_a  BUFX2  + PLACED ( 4000 90000 )  N ;
+  - u_buf_b  BUFX2  + PLACED ( 104000 90000 ) S ;
+  - u_buf_c  BUFX2  + PLACED ( 104000 4000 )  FN ;
+  - u_dff_a  DFF    + PLACED ( 4000 4000 )   FS ;
+  - u_inv_a  INV    + PLACED ( 30000 50000 ) N ;
+  - u_inv_b  INV    + PLACED ( 84000 50000 ) S ;
+  - u_nand_a NAND2  + PLACED ( 50000 90000 ) FN ;
+  - u_nand_b NAND2  + PLACED ( 50000 4000 )  FS ;
+  - u_mux_a  MUX2   + PLACED ( 50000 40000 ) N ;
+  - u_nor_a  NOR2   + PLACED ( 30000 70000 ) S ;
+END COMPONENTS
+PINS 3 ;
+  - clk + NET clk + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 90000 ) ( 4000 90000 ) + PLACED ( 0 90000 ) N ;
+  - rst + NET rst + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 70000 ) ( 4000 70000 ) + PLACED ( 0 70000 ) N ;
+  - sum + NET sum + DIRECTION OUTPUT + USE SIGNAL + LAYER M1 ( 120000 70000 ) ( 116000 70000 ) + PLACED ( 120000 70000 ) N ;
+END PINS
+NETS 11 ;
+  - clk_net
+    ( PIN clk ) ( u_buf_a/A ) ( u_dff_a/CK )
+    + ROUTED M1 ( 4000 90000 ) ( 4000 95000 )
+    + ROUTED M2 ( 4000 95000 ) ( 4000 6000 )
+  ;
+  - n0
+    ( u_buf_a/Y ) ( u_buf_b/A )
+    + ROUTED M1 ( 9000 95000 ) ( 104000 90000 )
+  ;
+  - n1
+    ( u_buf_b/Y ) ( u_buf_c/A )
+    + ROUTED M1 ( 109000 90000 ) ( 104000 4000 )
+  ;
+  - n2
+    ( u_buf_c/Y ) ( u_dff_a/D )
+    + ROUTED M1 ( 109000 4000 ) ( 4000 12000 )
+  ;
+  - n3
+    ( u_dff_a/Q ) ( u_inv_a/A )
+    + ROUTED M1 ( 12000 12000 ) ( 30000 50000 )
+  ;
+  - n4
+    ( u_inv_a/Y ) ( u_nand_a/A )
+    + ROUTED M1 ( 33000 50000 ) ( 50000 90000 )
+  ;
+  - n5
+    ( PIN rst ) ( u_inv_b/A )
+    + ROUTED M1 ( 4000 70000 ) ( 84000 50000 )
+  ;
+  - n6
+    ( u_inv_b/Y ) ( u_nand_a/B )
+    + ROUTED M1 ( 87000 50000 ) ( 50000 95000 )
+  ;
+  - n7
+    ( u_nand_a/Y ) ( u_nand_b/A )
+    + ROUTED M1 ( 55000 95000 ) ( 50000 4000 )
+  ;
+  - n8
+    ( u_nand_b/Y ) ( u_mux_a/A )
+    + ROUTED M1 ( 55000 5000 ) ( 50000 40000 )
+  ;
+  - sum_net
+    ( u_mux_a/Y ) ( u_nor_a/A )
+    + ROUTED M1 ( 55000 45000 ) ( 30000 70000 )
+  ;
+END NETS
+END DESIGN

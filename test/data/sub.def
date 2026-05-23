@@ -1,0 +1,29 @@
+DESIGN sub ;
+UNITS DISTANCE MICRONS 2000 ;
+DIEAREA ( 0 0 ) ( 0 50000 ) ( 50000 50000 ) ( 50000 0 ) ;
+COMPONENTS 3 ;
+  - BUFX2_inst BUFX2 + PLACED ( 10000 25000 ) N ;
+  - DFF_inst DFF + PLACED ( 20000 10000 ) N ;
+  - NAND2_inst NAND2 + PLACED ( 30000 25000 ) N ;
+END COMPONENTS
+PINS 2 ;
+  - clk + NET clk + DIRECTION INPUT + USE SIGNAL + LAYER M1 ( 0 35000 ) ( 5000 35000 ) + PLACED ( 0 35000 ) N ;
+  - sig_out + NET sig_out + DIRECTION OUTPUT + USE SIGNAL + LAYER M1 ( 50000 25000 ) ( 45000 25000 ) + PLACED ( 50000 25000 ) N ;
+END PINS
+NETS 3 ;
+  - n1
+    ( BUFX2_inst/Y ) ( DFF_inst/D ) ( NAND2_inst/A )
+    + ROUTED M1 ( 15000 30000 ) ( 25000 18000 )
+    + ROUTED M1 ( 25000 18000 ) ( 30000 25000 )
+  ;
+  - n2
+    ( DFF_inst/Q ) ( NAND2_inst/B )
+    + ROUTED M1 ( 28000 18000 ) ( 30000 35000 )
+  ;
+  - clk_net
+    ( PIN clk ) ( BUFX2_inst/A ) ( DFF_inst/CK )
+    + ROUTED M1 ( 5000 35000 ) ( 10000 30000 )
+    + ROUTED M1 ( 10000 30000 ) ( 20000 12000 )
+  ;
+END NETS
+END DESIGN
